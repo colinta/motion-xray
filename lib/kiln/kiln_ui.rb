@@ -72,7 +72,7 @@ module Kiln
 
     def half_screen_height
       if UIDevice.currentDevice.userInterfaceIdiom == UIUserInterfaceIdiomPhone
-        284
+        window.bounds.height / 2
       else
         512
       end
@@ -139,6 +139,9 @@ module Kiln
         @assign_button = UIButton.detail
         @assign_button.transform = CGAffineTransformMakeRotation(90.degrees)
         @assign_button.frame = @assign_button.frame.x(half_screen_width - @assign_button.frame.width)
+        @assign_button.on :touch {
+          edit(@selected) if @selected
+        }
         @bottom_bar << @assign_button
 
         @table = UITableView.alloc.initWithFrame(CGRect.empty, style: :plain.uitableviewstyle)
@@ -149,7 +152,7 @@ module Kiln
 
         @label = HeaderBackground.alloc.initWithFrame([[0, label_top + bottom_half_height], [full_screen_width, label_height]])
         @label.label = HeaderLabel.alloc.initWithFrame(@label.bounds)
-        @label.text = @teh_ui.inspect
+        @label.label.font = 'Futura'.uifont(9)
         @teh_ui << @label
 
         @canvas = UIScrollView.alloc.init
@@ -158,6 +161,8 @@ module Kiln
         grad_layer.frame = @canvas.layer.bounds
         grad_layer.colors = [:white.uicolor.cgcolor, :lightgray.uicolor.cgcolor]
         @canvas.layer << grad_layer
+        @editors = Kiln::TypewriterView.alloc.initWithFrame(@canvas.bounds)
+        @canvas << @editors
         @teh_ui << @canvas
       end
 
@@ -265,10 +270,8 @@ module Kiln
       UIView.animate {
         if @selected == window
           selector_frame = [[0, 0], [half_screen_width, half_screen_height]]
-        elsif @revert[:views].include?(@selected)
-          selector_frame = window.convertRect(@selected.bounds, fromView:@selected)
         else
-          selector_frame = window.convertRect(@selected.frame, fromView:@selected.superview)
+          selector_frame = window.convertRect(@selected.bounds, fromView:@selected)
         end
         @selector.frame = selector_frame
       }
@@ -276,9 +279,17 @@ module Kiln
 
     def edit(editing)
       @editing = editing
+      @label.text = @editing.inspect
       properties = @editing.kiln
       sections = properties.keys
       properties.each do |section, editors|
+        section_view = Kiln::SectionHeader.alloc.initWithFrame([[0, 0], [full_screen_width, 20]])
+        section_view.text = section
+        @editors << section_view
+        editors.each do |property,editor|
+          section_view.tracking_view << editor.with_property(property).get_edit_view(@editing, @editors.bounds)
+        end
+        @editors << section_view.tracking_view
       end
     end
 

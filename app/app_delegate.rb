@@ -8,6 +8,8 @@ class AppDelegate
     first = UINavigationController.alloc.initWithRootViewController(ctlr)
     @window.rootViewController = first
     @window.makeKeyAndVisible
+
+    0.2.seconds.later { Kiln.fire_up }
     true
   end
 end

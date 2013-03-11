@@ -6,7 +6,7 @@ class UIView
     def kiln
       @kiln ||= {
         'Frame' => {
-          frame: FrameEditor,
+          frame: Kiln::FrameEditor,
         }
       }
     end
@@ -41,7 +41,7 @@ class << UILabel
   def kiln
     @kiln = {
       'Content' => {
-        text: TextEditor,
+        text: Kiln::TextEditor,
       }
     }
   end
