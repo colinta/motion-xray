@@ -1,3 +1,12 @@
+class UIImage
+  class << self
+    alias :imageNamed_old :imageNamed
+    def imageNamed(name)
+      imageNamed_old(name)
+    end
+  end
+end
+
 class UIView
 
   class << self
@@ -7,7 +16,10 @@ class UIView
       @kiln ||= {
         'Frame' => {
           frame: Kiln::FrameEditor,
-        }
+        },
+        'Color' => {
+          backgroundColor: Kiln::ColorEditor,
+        },
       }
     end
 
@@ -16,13 +28,18 @@ class UIView
     def build_kiln
       @retval ||= begin
         retval = Hash.new { |hash,key| hash[key] = {} }
+        klasses = []
         klass = self
         while klass && klass <= UIView
+          klasses.unshift(klass)
+          klass = klass.superclass
+        end
+
+        klasses.each do |klass|
           kiln_props = klass.kiln
           kiln_props && kiln_props.each do |key,values|
             retval[key] = values.merge(retval[key])
           end
-          klass = klass.superclass
         end
         retval
       end
@@ -39,7 +56,7 @@ end
 
 class << UILabel
   def kiln
-    @kiln = {
+    @kiln ||= {
       'Content' => {
         text: Kiln::TextEditor,
       }

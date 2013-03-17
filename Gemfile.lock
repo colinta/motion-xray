@@ -2,13 +2,14 @@ PATH
   remote: .
   specs:
     kiln (0.1.0)
-      geomotion
+      geomotion (>= 0.7.0)
       sugarcube
+      teacup
 
 PATH
   remote: ../sugarcube
   specs:
-    sugarcube (0.18.3)
+    sugarcube (0.18.21)
 
 GEM
   remote: https://rubygems.org/
@@ -77,4 +78,3 @@ DEPENDENCIES
   rake
   rspec
   sugarcube!
-  teacup

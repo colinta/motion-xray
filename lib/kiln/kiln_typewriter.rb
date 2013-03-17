@@ -104,14 +104,7 @@ module Kiln
     ##|  START AT 0, 0, AND START FLOATING
     ##|
     def layoutSubviews
-      layoutIfNeeded
       super
-    end
-
-    def layoutIfNeeded
-      NSLog("=============== typewriter.rb line #{__LINE__} ===============
-=============== #{self.class == Class ? self.name + '##' : self.class.name + '#'}#{__method__} ===============
-self: #{self.inspect}")
       # super
       # the max_height of *all* the rows so far (not just the current row)
       @max_height = top_margin
@@ -122,6 +115,8 @@ self: #{self.inspect}")
 
       self.subviews.each do |view|
         unless view == @background_view
+          view.setNeedsLayout
+          view.layoutIfNeeded
           add_next(view)
         end
       end
@@ -135,6 +130,10 @@ self: #{self.inspect}")
       if background_view
         background_view.frame = self.bounds
       end
+    end
+
+    def setNeedsLayout
+      super
     end
 
     def background_view=(view)

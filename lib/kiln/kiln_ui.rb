@@ -1,30 +1,10 @@
 module Kiln
-  module_function
-
-  def ui
-    @kiln ||= UI.new
-  end
-
-  def toggle
-    Kiln.ui.toggle
-  end
-
-  def fire_up
-    Kiln.ui.fire_up
-  end
-
-  def cool_down
-    Kiln.ui.cool_down
-  end
-
-end
-
-module Kiln
   class UI
     attr :assign_button
     attr :back_button
     attr :top_bar
     attr :bottom_bar
+    attr :bottom_half
     attr :canvas
     attr :label
     attr :revert
@@ -86,20 +66,34 @@ module Kiln
       30
     end
 
-    def label_top
+    def bottom_half_top
       half_screen_height
+    end
+
+    def label_top
+      0
     end
 
     def label_height
       25
     end
 
-    def canvas_top
+    def toolbar_top
       label_top + label_height
     end
 
+    def toolbar_height
+      25
+    end
+
+    def canvas_top
+      # toolbar_top + toolbar_height
+      0
+    end
+
     def canvas_height
-      bottom_half_height - label_height
+      # bottom_half_height - label_height - toolbar_height
+      bottom_half_height
     end
 
     def fired?
@@ -150,20 +144,28 @@ module Kiln
         @table.delegate = self
         @teh_ui << @table
 
-        @label = HeaderBackground.alloc.initWithFrame([[0, label_top + bottom_half_height], [full_screen_width, label_height]])
-        @label.label = HeaderLabel.alloc.initWithFrame(@label.bounds)
-        @label.label.font = 'Futura'.uifont(9)
-        @teh_ui << @label
+        @bottom_half = UIView.alloc.initWithFrame([[0, bottom_half_top], [full_screen_width, bottom_half_height]])
+        grad_layer = CAGradientLayer.layer
+        grad_layer.frame = @bottom_half.layer.bounds
+        grad_layer.colors = [:white.uicolor.cgcolor, :lightgray.uicolor.cgcolor]
+        @bottom_half.layer << grad_layer
+        @teh_ui << @bottom_half
+
+        # @editing_label = HeaderBackground.alloc.initWithFrame([[0, label_top], [full_screen_width, label_height]])
+        # @editing_label.label = HeaderLabel.alloc.initWithFrame(@editing_label.bounds)
+        # @editing_label.label.font = 'Futura'.uifont(9)
+        # @bottom_half << @editing_label
+
+        # @toolbar = HeaderBackground.alloc.initWithFrame([[0, toolbar_top], [full_screen_width, toolbar_height]])
+        # @bottom_half << @toolbar
 
         @canvas = UIScrollView.alloc.init
-        @canvas.frame = [[0, canvas_top + bottom_half_height], [full_screen_width, canvas_height]]
-        grad_layer = CAGradientLayer.layer
-        grad_layer.frame = @canvas.layer.bounds
-        grad_layer.colors = [:white.uicolor.cgcolor, :lightgray.uicolor.cgcolor]
-        @canvas.layer << grad_layer
+        @canvas.frame = [[0, canvas_top], [full_screen_width, canvas_height]]
         @editors = Kiln::TypewriterView.alloc.initWithFrame(@canvas.bounds)
+        @editors.scroll_view = @canvas
+        @editor_instances = []
         @canvas << @editors
-        @teh_ui << @canvas
+        @bottom_half << @canvas
       end
 
       @selector.fade_in
@@ -174,10 +176,8 @@ module Kiln
       @table.frame = @table.frame.x(full_screen_width)
       @table.slide :left, half_screen_width
 
-      @label.frame = @label.frame.y(label_top + bottom_half_height)
-      @label.slide :up, bottom_half_height
-      @canvas.frame = @canvas.frame.y(canvas_top + bottom_half_height)
-      @canvas.slide :up, bottom_half_height
+      @bottom_half.frame = @bottom_half.frame.y(full_screen_height)
+      @bottom_half.slide :up, bottom_half_height
 
       window << @teh_ui
     end
@@ -228,8 +228,7 @@ module Kiln
       @top_bar.slide(:right, half_screen_width)
       @bottom_bar.slide(:right, half_screen_width)
       @table.slide(:right, half_screen_width)
-      @label.slide(:down, bottom_half_height)
-      @canvas.slide(:down, bottom_half_height) {
+      @bottom_half.slide(:down, bottom_half_height) {
         @teh_ui.removeFromSuperview
       }
 
@@ -277,20 +276,34 @@ module Kiln
       }
     end
 
+    def save_changes(notification)
+      # notification.object
+      # notification.userInfo['property']
+      # notification.userInfo['value']
+    end
+
     def edit(editing)
+      @editors.subviews.each &:removeFromSuperview
+      @editor_instances = []
       @editing = editing
-      @label.text = @editing.inspect
+      KilnNotificationTargetDidChange.remove_observer(self)
+      KilnNotificationTargetDidChange.add_observer(self, :'save_changes:', @editing)
+
+      @editing_label.text = @editing.inspect if @editing_label
       properties = @editing.kiln
       sections = properties.keys
       properties.each do |section, editors|
-        section_view = Kiln::SectionHeader.alloc.initWithFrame([[0, 0], [full_screen_width, 20]])
+        section_view = SectionHeader.alloc.initWithFrame([[0, 0], [full_screen_width, 20]])
         section_view.text = section
         @editors << section_view
-        editors.each do |property,editor|
-          section_view.tracking_view << editor.with_property(property).get_edit_view(@editing, @editors.bounds)
+        editors.each do |property, editor_class|
+          editor_instance = editor_class.with_target(@editing, property:property)
+          @editor_instances << editor_instance
+          section_view.tracking_view << editor_instance.get_edit_view(@editors.bounds)
         end
         @editors << section_view.tracking_view
       end
+      @editors.layoutIfNeeded
     end
 
     def back
@@ -375,26 +388,6 @@ module Kiln
         @detail_button.frame = [[143.0, -0.5], [17.0, 19.0]]
         contentView << @detail_button
       end
-    end
-
-    def touchesBegan(touches, withEvent:event)
-      super
-      NSLog("=============== kiln.rb line #{__LINE__} ===============")
-    end
-
-    def touchesMoved(touches, withEvent:event)
-      super
-      NSLog("=============== kiln.rb line #{__LINE__} ===============")
-    end
-
-    def touchesEnded(touches, withEvent:event)
-      super
-      NSLog("=============== kiln.rb line #{__LINE__} ===============")
-    end
-
-    def touchesCancelled(touches, withEvent:event)
-      super
-      NSLog("=============== kiln.rb line #{__LINE__} ===============")
     end
 
   end

@@ -1,4 +1,5 @@
 module Kiln
+
   class HeaderBackground < UIView
     attr_accessor :label
 
@@ -44,6 +45,7 @@ module Kiln
     def initWithFrame(frame)
       super.tap do
         @exposed = true
+        @pressed = false
         @tracking_view = TypewriterView.alloc.initWithFrame([[0, 0], [self.frame.size.width, 0]])
       end
     end
@@ -59,10 +61,13 @@ module Kiln
     def drawRect(rect)
       context = UIGraphicsGetCurrentContext()
       color_space = CGColorSpaceCreateDeviceRGB()
-      cgcolors = [
-        :white.uicolor.CGColor,
-        :lightgray.uicolor.CGColor,
-      ]
+      if @pressed
+      else
+        cgcolors = [
+          :white.uicolor.CGColor,
+          :lightgray.uicolor.CGColor,
+        ]
+      end
 
       points = [0, 1]
 
