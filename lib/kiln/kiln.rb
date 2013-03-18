@@ -1,6 +1,5 @@
 module Kiln
   module_function
-
   def ui
     @kiln ||= UI.new
   end
@@ -15,6 +14,26 @@ module Kiln
 
   def cool_down
     Kiln.ui.cool_down
+  end
+
+  def window
+    UIApplication.sharedApplication.keyWindow || UIApplication.sharedApplication.windows[0]
+  end
+
+  def app_shared
+    UIApplication.sharedApplication
+  end
+
+  def app_bounds
+    UIScreen.mainScreen.bounds
+  end
+
+  def plugins
+    @plugins ||= []
+  end
+
+  def register(plugin)
+    Kiln.plugins << plugin
   end
 
 end

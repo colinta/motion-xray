@@ -26,24 +26,12 @@ module Kiln
       return fired?
     end
 
-    def window
-      UIApplication.sharedApplication.keyWindow || UIApplication.sharedApplication.windows[0]
-    end
-
-    def app_shared
-      UIApplication.sharedApplication
-    end
-
-    def app_bounds
-      UIScreen.mainScreen.bounds
-    end
-
     def full_screen_width
-      window.bounds.width
+      Kiln.window.bounds.width
     end
 
     def full_screen_height
-      window.bounds.height
+      Kiln.window.bounds.height
     end
 
     def half_screen_width
@@ -51,11 +39,7 @@ module Kiln
     end
 
     def half_screen_height
-      if UIDevice.currentDevice.userInterfaceIdiom == UIUserInterfaceIdiomPhone
-        window.bounds.height / 2
-      else
-        512
-      end
+      Kiln.window.bounds.height / 2
     end
 
     def bottom_half_height
@@ -70,16 +54,8 @@ module Kiln
       half_screen_height
     end
 
-    def label_top
-      0
-    end
-
-    def label_height
-      25
-    end
-
     def toolbar_top
-      label_top + label_height
+      bottom_half_height - 25
     end
 
     def toolbar_height
@@ -87,62 +63,81 @@ module Kiln
     end
 
     def canvas_top
-      # toolbar_top + toolbar_height
       0
     end
 
     def canvas_height
-      # bottom_half_height - label_height - toolbar_height
-      bottom_half_height
+      bottom_half_height - toolbar_height
     end
 
     def fired?
       @fired
     end
 
-    def build_the_ui(teh_transform)
+    def build_the_ui
       unless @teh_ui
-        @teh_ui = UIView.alloc.initWithFrame(window.bounds)
+        @teh_ui = UIView.alloc.initWithFrame(Kiln.window.bounds)
 
-        @cover = UIView.alloc.initWithFrame(@teh_ui.bounds)
-        @cover.layer.transform = teh_transform
+        @cover = UIControl.alloc.initWithFrame(@teh_ui.bounds)
+        @cover.on :touch {
+          Kiln.cool_down
+          2.seconds.later do
+            Kiln.fire_up
+          end
+        }
         @teh_ui << @cover
 
         @selector = UIView.alloc.init
+        @selector.userInteractionEnabled = false
         @selector.layer.borderWidth = 1
         @selector.layer.borderColor = '#a91105'.uicolor.cgcolor
         @selector.layer.opacity = 0
         @teh_ui << @selector
 
-        @top_bar = HeaderBackground.alloc.initWithFrame([[full_screen_width, 0], [half_screen_width, bar_height]])
+        @top_half = UIView.alloc.initWithFrame([[0, 0], [half_screen_width, half_screen_height]])
+        @teh_ui << @top_half
+
+        @table = UITableView.alloc.initWithFrame(CGRect.empty, style: :plain.uitableviewstyle)
+        @table.frame = [[0, bar_height], [half_screen_width, half_screen_height - bar_height * 2]]
+        @table.rowHeight = 20
+        @table.delegate = self
+        @top_half << @table
+
+        @top_bar = HeaderBackground.alloc.initWithFrame([[0, 0], [half_screen_width, bar_height]])
         @top_bar.label = HeaderLabel.alloc.initWithFrame(@top_bar.bounds.right(30).thinner(30))
 
-        @back_button = UIButton.detail
+        @back_button = DetailButton.alloc.init
         @back_button.transform = CGAffineTransformMakeRotation(180.degrees)
         @back_button.enabled = false
         @back_button.on :touch {
           back
         }
         @top_bar << @back_button
-        @teh_ui << @top_bar
 
-        @bottom_bar = HeaderBackground.alloc.initWithFrame([[full_screen_width, half_screen_height - bar_height], [half_screen_width, bar_height]])
+        @choose_button = UIButton.custom
+        @choose_button.setImage('kiln_choose_button'.uiimage, forState: :normal.uicontrolstate)
+        @choose_button.sizeToFit
+        f = @choose_button.frame
+        f.origin = @top_bar.bounds.top_right + CGPoint.new(-4 - f.width, 4)
+        @choose_button.frame = f
+        @choose_button.on :touch {
+          choose_view
+        }
+        @top_bar << @choose_button
+
+        @top_half << @top_bar
+
+        @bottom_bar = HeaderBackground.alloc.initWithFrame([[0, half_screen_height - bar_height], [half_screen_width, bar_height]])
         @bottom_bar.label = HeaderLabel.alloc.initWithFrame(@bottom_bar.bounds.right(3).thinner(33))
-        @teh_ui << @bottom_bar
+        @top_half << @bottom_bar
 
-        @assign_button = UIButton.detail
+        @assign_button = DetailButton.alloc.init
         @assign_button.transform = CGAffineTransformMakeRotation(90.degrees)
         @assign_button.frame = @assign_button.frame.x(half_screen_width - @assign_button.frame.width)
         @assign_button.on :touch {
           edit(@selected) if @selected
         }
         @bottom_bar << @assign_button
-
-        @table = UITableView.alloc.initWithFrame(CGRect.empty, style: :plain.uitableviewstyle)
-        @table.frame = [[full_screen_width, bar_height], [half_screen_width, half_screen_height - bar_height * 2]]
-        @table.rowHeight = 20
-        @table.delegate = self
-        @teh_ui << @table
 
         @bottom_half = UIView.alloc.initWithFrame([[0, bottom_half_top], [full_screen_width, bottom_half_height]])
         grad_layer = CAGradientLayer.layer
@@ -151,83 +146,72 @@ module Kiln
         @bottom_half.layer << grad_layer
         @teh_ui << @bottom_half
 
-        # @editing_label = HeaderBackground.alloc.initWithFrame([[0, label_top], [full_screen_width, label_height]])
-        # @editing_label.label = HeaderLabel.alloc.initWithFrame(@editing_label.bounds)
-        # @editing_label.label.font = 'Futura'.uifont(9)
-        # @bottom_half << @editing_label
-
-        # @toolbar = HeaderBackground.alloc.initWithFrame([[0, toolbar_top], [full_screen_width, toolbar_height]])
-        # @bottom_half << @toolbar
-
-        @canvas = UIScrollView.alloc.init
+        @canvas = KilnScrollView.alloc.init
         @canvas.frame = [[0, canvas_top], [full_screen_width, canvas_height]]
-        @editors = Kiln::TypewriterView.alloc.initWithFrame(@canvas.bounds)
-        @editors.scroll_view = @canvas
-        @editor_instances = []
-        @canvas << @editors
         @bottom_half << @canvas
+
+        @toolbar = Toolbar.alloc.initWithFrame([[-1, toolbar_top], [full_screen_width + 2, toolbar_height + 1]])
+        @toolbar.canvas = @canvas
+        @bottom_half << @toolbar
+
+        Kiln.plugins.each do |plugin|
+          @toolbar.add(plugin)
+        end
       end
 
       @selector.fade_in
-      @top_bar.frame = @top_bar.frame.x(full_screen_width)
-      @top_bar.slide :left, half_screen_width
-      @bottom_bar.frame = @bottom_bar.frame.x(full_screen_width)
-      @bottom_bar.slide :left, half_screen_width
-      @table.frame = @table.frame.x(full_screen_width)
-      @table.slide :left, half_screen_width
+
+      @top_half.frame = @top_half.frame.x(full_screen_width)
+      @top_half.slide :left, half_screen_width
 
       @bottom_half.frame = @bottom_half.frame.y(full_screen_height)
       @bottom_half.slide :up, bottom_half_height
 
-      window << @teh_ui
+      Kiln.window << @teh_ui
     end
 
     def fire_up
       return if @fired
       @fired = true
 
+      UIDeviceOrientationDidChangeNotification.add_observer(self, :'orientation_changed:')
+
       # gather all window subviews into 'revert_view'
       @revert = {
         views: [],
-        status_bar_was_hidden?: app_shared.statusBarHidden?,
+        status_bar_was_hidden?: Kiln.app_shared.statusBarHidden?,
         transforms: {}
       }
 
-      dx = -app_bounds.width / 4
-      dy = -app_bounds.height / 4
-
-      teh_transform = CATransform3DScale(CATransform3DMakeTranslation(dx, dy, 0), 0.5, 0.5, 1)
-      window.subviews.each do |subview|
+      Kiln.window.subviews.each do |subview|
         @revert[:views] << subview
         @revert[:transforms][subview] = subview.layer.transform
-
-        UIView.animate {
-          subview.layer.transform = teh_transform
-        }
       end
-      app_shared.setStatusBarHidden(true, withAnimation:UIStatusBarAnimationSlide)
+      Kiln.app_shared.setStatusBarHidden(true, withAnimation:UIStatusBarAnimationSlide)
 
-      build_the_ui(teh_transform)
+      build_the_ui
+      apply_transform(true)
 
-      if @selected && ! @selected.isDescendantOfView(window)
+      if @selected && ! @selected.isDescendantOfView(Kiln.window)
         @selected = nil
       end
-      if @editing && ! @editing.isDescendantOfView(window)
+      # reset plugins?
+      select(Kiln.window) unless @selected
+      if @editing && ! @editing.isDescendantOfView(Kiln.window)
         @editing = nil
       end
-      select(window, update:true) unless @selected
-      edit(window) unless @editing
-      app_shared.setStatusBarHidden(true, withAnimation:UIStatusBarAnimationSlide)
+      edit(Kiln.window) unless @editing
+      Kiln.app_shared.setStatusBarHidden(true, withAnimation:UIStatusBarAnimationSlide)
     end
 
     def cool_down
       return unless @fired
       @fired = false
 
+      UIDeviceOrientationDidChangeNotification.remove_observer(self)
+
       @selector.fade_out
-      @top_bar.slide(:right, half_screen_width)
-      @bottom_bar.slide(:right, half_screen_width)
-      @table.slide(:right, half_screen_width)
+      @top_half.slide(:right, half_screen_width)
       @bottom_half.slide(:down, bottom_half_height) {
         @teh_ui.removeFromSuperview
       }
@@ -239,23 +223,118 @@ module Kiln
           subview.layer.anchorPoint = [0.5, 0.5]
         }
       end
-      app_shared.setStatusBarHidden(@revert[:status_bar_was_hidden?], withAnimation:UIStatusBarAnimationSlide)
+      Kiln.app_shared.setStatusBarHidden(@revert[:status_bar_was_hidden?], withAnimation:UIStatusBarAnimationSlide)
       @revert = nil
     end
 
+    def choose_view
+      restore_shown_views = @revert[:views].reverse.map { |subview|
+        collect_views(subview)
+      }.flatten.select { |subview| !subview.hidden? }
+
+      @choose_view = UIView.alloc.initWithFrame(Kiln.window.bounds)
+      @choose_view.backgroundColor = :black.uicolor
+      @choose_view.opaque = true
+      @choose_view.alpha = 0.0
+
+      controls = @revert[:views].reverse.map { |subview|
+        buttony_views(subview)
+      }.flatten
+
+      restore_shown_views.each do |subview|
+        subview.show
+      end
+
+      label = UILabel.alloc.initWithFrame(@choose_view.bounds)
+      label.backgroundColor = :clear.uicolor
+      label.textColor = :white.uicolor
+      label.textAlignment = :center.uitextalignment
+
+      controls.reverse.each do |control|
+        control.label = label
+        @choose_view << control
+      end
+
+      @choose_view << label
+
+      Kiln.window << @choose_view
+      @choose_view.fade_in
+      timer = 0
+      # @choose_view.subviews.each do |subview|
+      #   timer.later do
+      #     subview.slide(:right, Kiln.window.bounds.width)
+      #   end
+      #   timer += 0.1
+      # end
+    end
+
+    def did_choose_view(view)
+      radius = Math.sqrt(Kiln.window.bounds.width**2 + Kiln.window.bounds.height**2)
+      window_center = Kiln.window.center
+      @choose_view.subviews.each do |subview|
+        angle = window_center.angle_to(subview.center)
+        random_x = radius * Math.cos(angle)
+        random_y = radius * Math.sin(angle)
+        subview.move_to([random_x, random_y], 1)
+      end
+      0.5.later do
+        @choose_view.fade_out
+      end
+      edit(view)
+      select(view.superview || view)
+    end
+
+    def collect_views(view)
+      view.kiln_subviews.reverse.map { |subview|
+        collect_views(subview)
+      }.flatten + [view]
+    end
+
+    def buttony_views(view)
+      children = view.kiln_subviews.reverse.map { |subview|
+        buttony_views(subview)
+      }.flatten
+
+      f = view.convertRect(view.bounds, toView:nil)
+      f.origin.x *= 2
+      f.origin.y *= 2
+      f.size.width *= 2
+      f.size.height *= 2
+      # f = f.left(Kiln.window.bounds.width)
+
+      btn = ChooseViewButton.alloc.initWithFrame(f)
+      btn.target = view
+      btn.on(:touch_down_repeat) {
+        did_choose_view(view)
+      }
+
+      btn.children = children
+
+      btn.setImage(view.uiimage, forState: :normal.uicontrolstate)
+      btn.layer.borderColor = :white.uicolor.cgcolor
+      btn.layer.borderWidth = 1
+      children.each do |subbtn|
+        btn << subbtn
+      end
+      view.hide
+
+      children + [btn]
+    end
+
+    def select(selected)
+      select(selected, update:true)
+    end
     def select(selected, update:update_table)
       return unless selected
 
       @selected = selected
       SugarCube::Adjust::adjust(@selected)
 
-      @bottom_bar.text = @selected.class.name
-
       if update_table
-        if @selected == window
+        if @selected == Kiln.window
           subviews = @revert[:views]
         else
-          subviews = @selected.subviews
+          subviews = @selected.kiln_subviews
         end
         @top_bar.text = @selected.class.name
         @table_source = Kiln::TableSource.new(@selected.superview, subviews)
@@ -267,56 +346,67 @@ module Kiln
       end
 
       UIView.animate {
-        if @selected == window
+        if @selected == Kiln.window
           selector_frame = [[0, 0], [half_screen_width, half_screen_height]]
         else
-          selector_frame = window.convertRect(@selected.bounds, fromView:@selected)
+          selector_frame = Kiln.window.convertRect(@selected.bounds, fromView:@selected)
         end
         @selector.frame = selector_frame
       }
     end
 
-    def save_changes(notification)
-      # notification.object
-      # notification.userInfo['property']
-      # notification.userInfo['value']
-    end
-
     def edit(editing)
-      @editors.subviews.each &:removeFromSuperview
-      @editor_instances = []
-      @editing = editing
-      KilnNotificationTargetDidChange.remove_observer(self)
-      KilnNotificationTargetDidChange.add_observer(self, :'save_changes:', @editing)
+      @bottom_bar.text = editing.to_s
 
-      @editing_label.text = @editing.inspect if @editing_label
-      properties = @editing.kiln
-      sections = properties.keys
-      properties.each do |section, editors|
-        section_view = SectionHeader.alloc.initWithFrame([[0, 0], [full_screen_width, 20]])
-        section_view.text = section
-        @editors << section_view
-        editors.each do |property, editor_class|
-          editor_instance = editor_class.with_target(@editing, property:property)
-          @editor_instances << editor_instance
-          section_view.tracking_view << editor_instance.get_edit_view(@editors.bounds)
-        end
-        @editors << section_view.tracking_view
+      Kiln.plugins.each do |plugin|
+        plugin.kiln_edit(editing)
       end
-      @editors.layoutIfNeeded
+      @editing = editing
     end
 
     def back
-      select(@table_source.superview, update:true)
+      select(@table_source.superview)
     end
 
     def tableView(table_view, didSelectRowAtIndexPath:index_path)
       table_selection = @table_source.subviews[index_path.row]
       if @selected == table_selection
         table_view.deselectRowAtIndexPath(index_path, animated:true)
-        select(table_selection.superview, update:false)
+        if table_selection.subviews.length > 0
+          select(table_selection)
+        else
+          edit(table_selection)
+        end
       else
         select(table_selection, update:false)
+      end
+    end
+
+    def orientation_changed(notification)
+      apply_transform
+      select(@selected)
+      edit(@editing)
+    end
+
+    def apply_transform(animate=true)
+      dx = -Kiln.app_bounds.width / 4
+      dy = -Kiln.app_bounds.height / 4
+      teh_transform = CATransform3DMakeTranslation(dx, dy, 0)
+      teh_transform = CATransform3DScale(teh_transform, 0.5, 0.5, 1)
+
+      case UIApplication.sharedApplication.statusBarOrientation
+      when UIInterfaceOrientationPortraitUpsideDown
+        teh_transform = CATransform3DRotate(teh_transform, 180.degrees, 0, 0, 1)
+      when UIInterfaceOrientationLandscapeLeft
+        teh_transform = CATransform3DRotate(teh_transform, -90.degrees, 0, 0, 1)
+      when UIInterfaceOrientationLandscapeRight
+        teh_transform = CATransform3DRotate(teh_transform, 90.degrees, 0, 0, 1)
+      end
+      @cover.layer.transform = teh_transform
+      UIView.animate(duration: animate ? nil : 0) do
+        @revert[:views].each do |subview|
+          subview.layer.transform = teh_transform
+        end
       end
     end
 
@@ -363,7 +453,7 @@ module Kiln
       if @subviews[cell.row].subviews.length > 0
         cell.detail_button.show
         cell.detail_button.on :touch {
-          cell.kiln.select(@subviews[cell.row], update:true)
+          cell.kiln.select(@subviews[cell.row])
         }
       else
         cell.detail_button.hide
@@ -384,11 +474,81 @@ module Kiln
       super.tap do
         textLabel.font = UIFont.systemFontOfSize(10)
         textLabel.lineBreakMode = :clip.uilinebreakmode
-        @detail_button = UIButton.detail_disclosure
-        @detail_button.frame = [[143.0, -0.5], [17.0, 19.0]]
+        @detail_button = DetailButton.alloc.init
+        @detail_button.frame = [[143, -0.5], [17, 19]]
         contentView << @detail_button
       end
     end
 
   end
+
+  class DetailButton < UIButton
+
+    def init
+      initWithFrame([[0, 0], [27, 29]])
+    end
+
+    def initWithFrame(frame)
+      super.tap do
+        setImage('kiln_detail_button'.uiimage, forState: :normal.uicontrolstate)
+      end
+    end
+
+    def pointInside(point, withEvent:event)
+      bounds.contains?(point)
+    end
+
+  end
+
+  class ChooseViewButton < UIButton
+    attr_accessor :label
+    attr_accessor :target
+    attr_accessor :children
+
+    def initWithFrame(frame)
+      super.tap do
+        self.backgroundColor = :clear.uicolor
+        @timer = nil
+
+        self.on(:touch_down) {
+          start_touch
+        }
+        self.on(:touch_stop) {
+          stop_touch
+        }
+      end
+    end
+
+    def start_touch
+      @label.text = target.inspect
+      @label.alpha = 0
+      @label.fade_in
+
+      self.backgroundColor = :black.uicolor(0.5)
+      @timer = 1.second.later do
+        stop_touch
+        slide_out
+      end
+    end
+
+    def stop_touch
+      self.backgroundColor = :clear.uicolor
+      @timer.invalidate if @timer
+      @timer = nil
+      0.5.later do
+        @label.fade_out
+      end
+    end
+
+    def slide_out
+      self.children.each do |child|
+        child.slide_out
+      end
+      self.slide(:up, Kiln.window.bounds.width) {
+        self.removeFromSuperview
+      }
+    end
+
+  end
+
 end

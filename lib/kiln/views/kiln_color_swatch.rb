@@ -37,7 +37,7 @@ module Kiln
     end
 
     def color=(value)
-      @color_swatch.backgroundColor = @original
+      @color_swatch.backgroundColor = value && value.uicolor
     end
 
     def color
@@ -88,6 +88,7 @@ module Kiln
 
     def drawRect(rect)
       super
+
       r = color.red
       g = color.green
       b = color.blue

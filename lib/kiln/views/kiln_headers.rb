@@ -81,14 +81,16 @@ module Kiln
       :clear.uicolor.setStroke
       :lightgray.uicolor.setFill
 
-      if @exposed
-        CGContextMoveToPoint(context, triangle_bounds.top_right(true).x, triangle_bounds.top_right(true).y)
-        CGContextAddLineToPoint(context, triangle_bounds.bottom_center(true).x, triangle_bounds.bottom_center(true).y)
-        CGContextAddLineToPoint(context, triangle_bounds.top_left(true).x, triangle_bounds.top_left(true).y)
-      else
-        CGContextMoveToPoint(context, triangle_bounds.top_left(true).x, triangle_bounds.top_left(true).y)
-        CGContextAddLineToPoint(context, triangle_bounds.center_right(true).x, triangle_bounds.center_right(true).y)
-        CGContextAddLineToPoint(context, triangle_bounds.bottom_left(true).x, triangle_bounds.bottom_left(true).y)
+      if false
+        if @exposed
+          CGContextMoveToPoint(context, triangle_bounds.top_right(true).x, triangle_bounds.top_right(true).y)
+          CGContextAddLineToPoint(context, triangle_bounds.bottom_center(true).x, triangle_bounds.bottom_center(true).y)
+          CGContextAddLineToPoint(context, triangle_bounds.top_left(true).x, triangle_bounds.top_left(true).y)
+        else
+          CGContextMoveToPoint(context, triangle_bounds.top_left(true).x, triangle_bounds.top_left(true).y)
+          CGContextAddLineToPoint(context, triangle_bounds.center_right(true).x, triangle_bounds.center_right(true).y)
+          CGContextAddLineToPoint(context, triangle_bounds.bottom_left(true).x, triangle_bounds.bottom_left(true).y)
+        end
       end
       CGContextDrawPath(context, KCGPathFillStroke)
       CGContextRestoreGState(context)

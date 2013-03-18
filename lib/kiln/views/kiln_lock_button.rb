@@ -1,14 +1,17 @@
 module Kiln
 
   class LockButton < UIButton
-    States = 3
-    UnlockedState = 0
-    LockedVerticalState = 1
-    LockedHorizontalState = 2
+    States = 4
+    LockedState = 0
+    UnlockedState = 1
+    LockedVerticalState = 2
+    LockedHorizontalState = 3
+    InitialState = LockedState
 
     UnlockedImage = 'kiln_lock_button_unlocked'.uiimage
     LockedHorizontalImage = 'kiln_lock_button_horizontal'.uiimage
     LockedVerticalImage = 'kiln_lock_button_vertical'.uiimage
+    LockedImage = 'kiln_lock_button_locked'.uiimage
 
     attr :lock_state
 
@@ -19,7 +22,7 @@ module Kiln
 
     def initWithFrame(frame)
       super.tap do
-        @lock_state = UnlockedState
+        @lock_state = InitialState
         update_state
         self.on :touch do
           @lock_state += 1
@@ -37,6 +40,8 @@ module Kiln
         self.setImage(LockedVerticalImage, forState: :normal.uicontrolstate)
       when LockedHorizontalState
         self.setImage(LockedHorizontalImage, forState: :normal.uicontrolstate)
+      when LockedState
+        self.setImage(LockedImage, forState: :normal.uicontrolstate)
       end
     end
 

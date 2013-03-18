@@ -3,7 +3,7 @@ module Kiln
   class FrameEditor < PropertyEditor
 
     def edit_view(rect)
-      UIView.alloc.initWithFrame([[0, 0], [rect.width, 80]]).tap do |view|
+      return UIView.alloc.initWithFrame([[0, 0], [rect.width, 80]]).tap do |view|
         frame_view = UIView.alloc.initWithFrame([[4, 4], [92, 72]])
         frame_view.style(
           clips: true,
@@ -65,6 +65,10 @@ module Kiln
     end
 
     def change_origin(delta)
+      if @locked_button.lock_state == LockButton::LockedState
+        return
+      end
+
       if @locked_button.lock_state == LockButton::LockedHorizontalState
         delta.y = 0
       end
@@ -77,11 +81,14 @@ module Kiln
       frame.origin.y += delta.y
       set_value(frame)
 
-      KilnNotificationTargetDidChange.post_notification(@target, { 'property' => @property, 'value' => frame })
       update_frame
     end
 
     def change_size(delta)
+      if @locked_button.lock_state == LockButton::LockedState
+        return
+      end
+
       if @locked_button.lock_state == LockButton::LockedHorizontalState
         delta.y = 0
       end
@@ -94,7 +101,6 @@ module Kiln
       frame.size.height += delta.y
       set_value(frame)
 
-      KilnNotificationTargetDidChange.post_notification(@target, { 'property' => @property, 'value' => frame })
       update_frame
     end
 

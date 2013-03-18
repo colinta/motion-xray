@@ -39,11 +39,25 @@ module Kiln
     end
 
     def get_value
-      target.send(property)
+
+      if target.respond_to?(property)
+        return target.send(property)
+      elsif target.respond_to?("#{property}?")
+        value = target.send("#{property}?")
+        return target.send("#{property}?")
+      end
     end
 
     def set_value(value)
-      target.send("#{property}=", value)
+      assign = "#{property}="
+      setter = "set#{property.sub(/^./) { |c| c.upcase }}"
+
+      if target.respond_to?(assign)
+        target.send(assign, value)
+      elsif target.respond_to?(setter)
+        target.send(setter, value)
+      end
+      KilnNotificationTargetDidChange.post_notification(@target, { 'property' => @property, 'value' => value, 'original' => @original })
     end
 
     def did_change?
