@@ -9,7 +9,7 @@ module Kiln
     attr :label
     attr :revert
     attr :selected
-    attr :editing
+    attr :target
     attr :cover
     attr :selector
     attr :subviews
@@ -197,10 +197,10 @@ module Kiln
       end
       # reset plugins?
       select(Kiln.window) unless @selected
-      if @editing && ! @editing.isDescendantOfView(Kiln.window)
-        @editing = nil
+      if @target && ! @target.isDescendantOfView(Kiln.window)
+        @target = nil
       end
-      edit(Kiln.window) unless @editing
+      edit(Kiln.window) unless @target
       Kiln.app_shared.setStatusBarHidden(true, withAnimation:UIStatusBarAnimationSlide)
     end
 
@@ -355,13 +355,13 @@ module Kiln
       }
     end
 
-    def edit(editing)
-      @bottom_bar.text = editing.to_s
+    def edit(target)
+      @bottom_bar.text = target.to_s
 
       Kiln.plugins.each do |plugin|
-        plugin.kiln_edit(editing)
+        plugin.kiln_edit(target)
       end
-      @editing = editing
+      @target = target
     end
 
     def back
@@ -385,7 +385,7 @@ module Kiln
     def orientation_changed(notification)
       apply_transform
       select(@selected)
-      edit(@editing)
+      edit(@target)
     end
 
     def apply_transform(animate=true)

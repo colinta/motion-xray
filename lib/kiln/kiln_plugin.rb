@@ -3,6 +3,7 @@ module Kiln
   class Plugin
     attr_accessor :name
     attr :view
+    attr :target
 
     def Plugin.name(value=nil)
       if value
@@ -24,7 +25,8 @@ module Kiln
       @view = kiln_view_in(canvas)
     end
 
-    def kiln_edit(editing)
+    def kiln_edit(target)
+      @target = target
     end
 
   end

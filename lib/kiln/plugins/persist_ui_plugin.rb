@@ -12,15 +12,15 @@ module Kiln
     end
 
     def save_changes(notification)
-      @changes[@editing] ||= {}
+      @changes[@target] ||= {}
       property = notification.userInfo['property']
       value = notification.userInfo['value']
       original = notification.userInfo['original']
 
       if value == original
-        @changes[@editing].delete(property)
+        @changes[@target].delete(property)
       else
-        @changes[@editing][property] = notification.userInfo['value']
+        @changes[@target][property] = notification.userInfo['value']
       end
 
       NSLog("=============== persist_ui_plugin.rb line #{__LINE__} ===============
@@ -32,10 +32,10 @@ value: #{value.inspect}
 ")
     end
 
-    def kiln_edit(editing)
-      @editing = editing
+    def kiln_edit(target)
+      super
       KilnNotificationTargetDidChange.remove_observer(self)
-      KilnNotificationTargetDidChange.add_observer(self, :'save_changes:', @editing)
+      KilnNotificationTargetDidChange.add_observer(self, :'save_changes:', @target)
     end
 
   end
