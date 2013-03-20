@@ -17,3 +17,4 @@ nbproject
 *.gem
 *.pxm
 /vendor/Pods/
+/vendor/Pods
