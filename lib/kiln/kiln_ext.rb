@@ -1,8 +1,8 @@
 class UIImage
   class << self
-    alias :imageNamed_old :imageNamed
+    alias :imageNamed_kiln_old :imageNamed
     def imageNamed(name)
-      imageNamed_old(name)
+      imageNamed_kiln_old(name)
     end
   end
 end
