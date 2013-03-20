@@ -11,30 +11,20 @@ module Kiln
       def add_log(type, args)
         message = sprintf(*args)
         case type
-        when :log, :white
-          nslog = "\033[37m#{message}\033[0m"
-          log_message = NSMutableAttributedString.alloc.initWithString("#{message}\n", attributes: {
-            NSForegroundColorAttributeName => 0xBCBEAB.uicolor,
-          })
         when :error, :red
           nslog = "\033[31;4;1mERROR!\033[0m\033[31m #{message}\033[0m"
           log_message = NSMutableAttributedString.alloc.initWithString("ERROR! #{message}\n", attributes: {
             NSForegroundColorAttributeName => 0xCB7172.uicolor,
-          })
-        when :ok, :green
-          nslog = "\033[32m#{message}\033[0m"
-          log_message = NSMutableAttributedString.alloc.initWithString("#{message}\n", attributes: {
-            NSForegroundColorAttributeName => 0x60B48A.uicolor,
           })
         when :warning, :yellow
           nslog = "\033[33m#{message}\033[0m"
           log_message = NSMutableAttributedString.alloc.initWithString("#{message}\n", attributes: {
             NSForegroundColorAttributeName => 0xDFAF8F.uicolor,
           })
-        when :debug, :blue
-          nslog = "\033[34m#{message}\033[0m"
+        when :log, :white
+          nslog = "\033[37m#{message}\033[0m"
           log_message = NSMutableAttributedString.alloc.initWithString("#{message}\n", attributes: {
-            NSForegroundColorAttributeName => 0x6B8197.uicolor,
+            NSForegroundColorAttributeName => 0xBCBEAB.uicolor,
           })
         when :notice, :magenta
           nslog = "\033[35m#{message}\033[0m"
@@ -46,11 +36,23 @@ module Kiln
           log_message = NSMutableAttributedString.alloc.initWithString("#{message}\n", attributes: {
             NSForegroundColorAttributeName => 0x67AAAD.uicolor,
           })
+        when :ok, :green
+          nslog = "\033[32m#{message}\033[0m"
+          log_message = NSMutableAttributedString.alloc.initWithString("#{message}\n", attributes: {
+            NSForegroundColorAttributeName => 0x60B48A.uicolor,
+          })
+        when :debug, :blue
+          nslog = "\033[34m#{message}\033[0m"
+          log_message = NSMutableAttributedString.alloc.initWithString("#{message}\n", attributes: {
+            NSForegroundColorAttributeName => 0x6B8197.uicolor,
+          })
         else
           raise "huh?"
         end
 
-        NSLog(nslog)
+        if Log.level >= Log::Levels[type]
+          NSLog(nslog)
+        end
 
         log << {message:log_message, date:NSDate.new}
         LogChangedNotification.post_notification
@@ -139,40 +141,66 @@ module Kiln
   module Log
     module_function
 
+    Error = 1
+    Warning = 2
+    Log = 3
+    Notice = 4
+    Info = 5
+    Ok = 6
+    Debug = 7
+
+    Levels = {
+      error: Error,
+      warning: Warning,
+      log: Log,
+      notice: Notice,
+      info: Info,
+      ok: Ok,
+      debug: Debug,
+    }
+
+    def level=(level)
+      @level = Levels[level] || level
+    end
+
+    def level
+      @level ||= Ok
+    end
+
     def _log(type, args)
       args = [''] if args == []
       LogPlugin.add_log(type, args)
     end
 
     def log(*args)
-      Log._log(:log, args)
+      _log(:log, args)
     end
 
     def error(*args)
-      Log._log(:error, args)
+      _log(:error, args)
     end
 
     def ok(*args)
-      Log._log(:ok, args)
+      _log(:ok, args)
     end
 
     def warning(*args)
-      Log._log(:warning, args)
+      _log(:warning, args)
     end
     def warn(*args)
-      Log._log(:warning, args)
+      _log(:warning, args)
     end
 
     def debug(*args)
-      Log._log(:debug, args)
+      _log(:debug, args)
     end
 
     def notice(*args)
-      Log._log(:notice, args)
+      _log(:notice, args)
     end
 
     def info(*args)
-      Log._log(:info, args)
+      _log(:info, args)
     end
   end
 
