@@ -173,6 +173,7 @@ module Kiln
     def fire_up
       return if @fired
       @fired = true
+      Kiln.window.first_responder && Kiln.window.first_responder.resignFirstResponder
 
       UIDeviceOrientationDidChangeNotification.add_observer(self, :'orientation_changed:')
 
