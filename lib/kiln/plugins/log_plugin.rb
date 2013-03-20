@@ -97,15 +97,23 @@ module Kiln
 
     def show_datetimes
       return if @showing_datetimes
+
       @showing_datetimes = true
       @toggle_button.setImage('kiln_close_drawer'.uiimage, forState: :normal.uicontrolstate)
+      @toggle_button.slide(:right, 25)
+      @text_view.frame = @text_view.frame.thinner(25)
+      @text_view.slide(:right, 25)
       update_log
     end
 
     def hide_datetimes
       return unless @showing_datetimes
+
       @showing_datetimes = false
       @toggle_button.setImage('kiln_open_drawer'.uiimage, forState: :normal.uicontrolstate)
+      @toggle_button.slide(:left, 25)
+      @text_view.frame = @text_view.frame.wider(25)
+      @text_view.slide(:left, 25)
       update_log
     end
 
