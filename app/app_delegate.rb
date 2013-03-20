@@ -9,6 +9,9 @@ class AppDelegate
     @window.rootViewController = first
     @window.makeKeyAndVisible
 
+    Kiln.register(Kiln::LogPlugin.new)
+    Kiln.register(Kiln::AccessibilityPlugin.new)
+
     true
   end
 end
