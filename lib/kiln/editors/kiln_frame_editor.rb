@@ -5,40 +5,35 @@ module Kiln
     def edit_view(rect)
       return UIView.alloc.initWithFrame([[0, 0], [rect.width, 80]]).tap do |view|
         frame_view = UIView.alloc.initWithFrame([[4, 4], [92, 72]])
-        frame_view.style(
-          clips: true,
-          background: :lightgray,
-          layer: {
-            borderWidth: 1,
-            borderColor: :gray,
-            cornerRadius: 5
-          })
+        frame_view.clipsToBounds = true
+        frame_view.backgroundColor = :lightgray.uicolor
+        frame_view.layer.borderWidth = 1
+        frame_view.layer.borderColor = :gray.uicolor.cgcolor
+        frame_view.layer.cornerRadius = 5
         view << frame_view
 
         labels_view = UIView.alloc.initWithFrame([[3, 0], [24, frame_view.bounds.height]])
-        labels_view << UILabel.new.style(
-          frame: [[4, 0], [18, 72]],
-          text: "X:\nY:\nW:\nH:",
-          alignment: :right,
-          font: :small,
-          background: :clear,
-          numberOfLines: 4,
-        )
+        label = UILabel.new
+        label.frame = [[4, 0], [18, 72]]
+        label.text = "X:\nY:\nW:\nH:"
+        label.textAlignment = :right.uitextalignment
+        label.font = :small.uifont
+        label.backgroundColor = :clear.uicolor
+        label.numberOfLines = 4
+        labels_view << label
         frame_view << labels_view
 
         values_view = UIView.alloc.initWithFrame([[labels_view.frame.max_x, 0], [65, frame_view.bounds.height]])
-        values_view.style(
-          background: :white,
-          layer: {
-            borderWidth: 1,
-            borderColor: :gray,
-          })
-        values_view << (@frame_label = UILabel.new.style(
-          frame: [[8, 0], [52, 72]],
-          font: :small,
-          background: :clear,
-          numberOfLines: 0,
-        ))
+        values_view.backgroundColor = :white.uicolor
+        values_view.layer.borderWidth = 1
+        values_view.layer.borderColor = :gray.uicolor
+        @frame_label = UILabel.new
+        @frame_label.frame = [[8, 0], [52, 72]]
+        @frame_label.font = :small.uifont
+        @frame_label.backgroundColor = :clear.uicolor
+        @frame_label.numberOfLines = 0
+        values_view << @frame_label
+
         update_frame
         frame_view << values_view
 
@@ -51,7 +46,7 @@ module Kiln
         view << size_dpad
 
         @locked_button = LockButton.alloc.init
-        @locked_button.style(origin: [252, 27])
+        @locked_button.frame = @locked_button.frame.x(252).y(27)
         view << @locked_button
       end
     end

@@ -40,13 +40,12 @@ module Kiln
         end
 
         label_x = image_size.width + 8
-        label_view = UILabel.new.style(
-          frame: [[label_x, 5], [rect.width - label_x, 18]],
-          text: @property.to_s,
-          font: :small,
-          background: :clear,
-          numberOfLines: 1,
-        )
+        label_view = UILabel.new
+        label_view.frame = [[label_x, 5], [rect.width - label_x, 18]]
+        label_view.text = @property.to_s
+        label_view.font = :small.uifont
+        label_view.backgroundColor = :clear.uicolor
+        label_view.numberOfLines = 1
         view << label_view
       end
     end

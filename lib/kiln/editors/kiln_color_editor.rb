@@ -70,12 +70,12 @@ module Kiln
         end
 
         label_x = color_size.width + 8
-        @label_view = UILabel.new.style(
-          frame: [[label_x, 5], [rect.width - label_x, 18]],
-          font: :small,
-          background: :clear,
-          numberOfLines: 1,
-        )
+        @label_view = UILabel.new.tap do |lbl|
+          lbl.frame = [[label_x, 5], [rect.width - label_x, 18]]
+          lbl.font = :small.uifont
+          lbl.backgroundColor = :clear.uicolor
+          lbl.numberOfLines = 1
+        end
         view << @label_view
         update_views
       end

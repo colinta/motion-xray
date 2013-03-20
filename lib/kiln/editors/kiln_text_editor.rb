@@ -29,13 +29,12 @@ module Kiln
       @text_editor_modal.fade_out
 
       return UIView.alloc.initWithFrame([[0, 0], [rect.width, 77]]).tap do |view|
-        label_view = UILabel.new.style(
-          frame: [[4, 5], [rect.width - 8, 18]],
-          text: @property.to_s,
-          font: :small,
-          background: :clear,
-          numberOfLines: 1,
-        )
+        label_view = UILabel.new
+        label_view.frame = [[4, 5], [rect.width - 8, 18]]
+        label_view.text = @property.to_s
+        label_view.font = :small.uifont
+        label_view.backgroundColor = :clear.uicolor
+        label_view.numberOfLines = 1
         view << label_view
 
         @open_text_button = UIButton.custom.tap do |button|

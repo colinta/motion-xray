@@ -1,8 +1,6 @@
 module Kiln
 
   class Editor
-    include Teacup::Layout
-
     attr_accessor :target
     attr_accessor :property
 
