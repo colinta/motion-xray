@@ -60,11 +60,7 @@ module Kiln
     end
 
     name 'Logs'
-
-    def initialize
-      super
-      @text_view = nil
-    end
+    ActionsWidth = 25
 
     def kiln_view_in(canvas)
       @text_view = UITextView.alloc.initWithFrame(canvas.bounds).tap do |text_view|
@@ -73,16 +69,32 @@ module Kiln
         text_view.backgroundColor = 0x2b2b2b.uicolor
       end
 
-      @toggle_button = UIButton.alloc.initWithFrame([[0, 0], [7, 259]])
-      @toggle_button.setImage('kiln_open_drawer'.uiimage, forState: :normal.uicontrolstate)
-      @toggle_button.on :touch {
+      @toggle_datetimes_button = UIButton.alloc.initWithFrame([[0, 0], [7, 259]])
+      @toggle_datetimes_button.setImage('kiln_drawer_right'.uiimage, forState: :normal.uicontrolstate)
+      @toggle_datetimes_button.on :touch {
         toggle_datetimes
       }
 
+      @toggle_actions_button = UIButton.alloc.initWithFrame([[0, 0], [7, 259]])
+      @toggle_actions_button.setImage('kiln_drawer_left'.uiimage, forState: :normal.uicontrolstate)
+      @toggle_actions_button.on :touch {
+        toggle_actions
+      }
+
+      btn_width = @toggle_actions_button.frame.width
+      actions_frame = [[canvas.bounds.width - btn_width, 0], [ActionsWidth + btn_width, 259]]
+      @actions_container = UIView.alloc.initWithFrame(actions_frame).tap do |actions|
+        clear_button = UIButton.custom
+        clear_button.
+      end
+      @actions_container << @toggle_actions_button
+
       @showing_datetimes = false
+      @showing_actions = false
       return UIView.alloc.initWithFrame(canvas.bounds).tap do |view|
         view << @text_view
-        view << @toggle_button
+        view << @toggle_datetimes_button
+        view << @actions_container
         view.backgroundColor = 0x2b2b2b.uicolor
       end
     end
@@ -99,10 +111,7 @@ module Kiln
       return if @showing_datetimes
 
       @showing_datetimes = true
-      @toggle_button.setImage('kiln_close_drawer'.uiimage, forState: :normal.uicontrolstate)
-      @toggle_button.slide(:right, 25)
-      @text_view.frame = @text_view.frame.thinner(25)
-      @text_view.slide(:right, 25)
+      @toggle_datetimes_button.setImage('kiln_drawer_left'.uiimage, forState: :normal.uicontrolstate)
       update_log
     end
 
@@ -110,11 +119,34 @@ module Kiln
       return unless @showing_datetimes
 
       @showing_datetimes = false
-      @toggle_button.setImage('kiln_open_drawer'.uiimage, forState: :normal.uicontrolstate)
-      @toggle_button.slide(:left, 25)
-      @text_view.frame = @text_view.frame.wider(25)
-      @text_view.slide(:left, 25)
+      @toggle_datetimes_button.setImage('kiln_drawer_right'.uiimage, forState: :normal.uicontrolstate)
       update_log
+    end
+
+    def toggle_actions
+      if @showing_actions
+        hide_actions
+      else
+        show_actions
+      end
+    end
+
+    def show_actions
+      return if @showing_actions
+
+      @showing_actions = true
+      @toggle_actions_button.setImage('kiln_drawer_right'.uiimage, forState: :normal.uicontrolstate)
+      @actions_container.slide(:left, size: ActionsWidth, options: UIViewAnimationOptionCurveLinear)
+      @text_view.frame = @text_view.frame.thinner(ActionsWidth)
+    end
+
+    def hide_actions
+      return unless @showing_actions
+
+      @showing_actions = false
+      @toggle_actions_button.setImage('kiln_drawer_left'.uiimage, forState: :normal.uicontrolstate)
+      @actions_container.slide(:right, size: ActionsWidth, options: UIViewAnimationOptionCurveLinear)
+      @text_view.frame = @text_view.frame.wider(ActionsWidth)
     end
 
     def show
