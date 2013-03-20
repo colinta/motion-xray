@@ -23,6 +23,7 @@ class UIView
         'UI' => {
           hidden: Kiln::BooleanEditor,
           userInteractionEnabled: Kiln::BooleanEditor,
+          accessibilityLabel: Kiln::TextEditor,
         },
       }
     end
@@ -86,18 +87,35 @@ class << UIWindow
   end
 end
 
-class UILabel
-  class << self
-    def kiln
-      @kiln ||= {
-        'Content' => {
-          text: Kiln::TextEditor,
-        }
+class << UILabel
+  def kiln
+    @kiln ||= {
+      'Content' => {
+        text: Kiln::TextEditor,
       }
-    end
+    }
   end
 end
 
+class << UITabBar
+  def kiln
+    @kiln ||= {
+      'Color' => {
+        tintColor: Kiln::ColorEditor,
+      },
+    }
+  end
+end
+
+class << UINavigationBar
+  def kiln
+    @kiln ||= {
+      'Color' => {
+        tintColor: Kiln::ColorEditor,
+      },
+    }
+  end
+end
 
 class UIButton
   def kiln_subviews

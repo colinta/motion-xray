@@ -29,6 +29,12 @@ module Kiln
       @target = target
     end
 
+    def show
+    end
+
+    def hide
+    end
+
   end
 
 end

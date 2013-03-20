@@ -70,8 +70,6 @@ module Kiln
       else
         raise "Too many arguments (#{margins.length}) sent to MarginView#margin"
       end
-
-      margins
     end
 
     ##|  DEFAULTS

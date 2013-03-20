@@ -1,10 +1,10 @@
 module Kiln
 
   class ColorEditor < PropertyEditor
+    ColorEditorMargin = 20
 
     def edit_view(rect)
       canvas_bounds = Kiln.ui.bottom_half.frame
-      @color_editor_margin = 20
       @color_editor_modal = UIView.alloc.initWithFrame(Kiln.window.bounds).tap do |color_editor_modal|
         close_editor_control = UIControl.alloc.initWithFrame(color_editor_modal.bounds)
         close_editor_control.on :touch do
@@ -13,18 +13,48 @@ module Kiln
         end
         color_editor_modal << close_editor_control
 
-        color_editor_modal << UIView.alloc.initWithFrame(canvas_bounds.shrink(@color_editor_margin)).tap do |background|
+        toolbar = Toolbar.alloc.initWithFrame(canvas_bounds.shrink(ColorEditorMargin).height(25).up(25))
+        toolbar.layer.cornerRadius = 3
+        color_editor_modal << toolbar
+        background = UIView.alloc.initWithFrame(canvas_bounds.shrink(ColorEditorMargin)).tap do |background|
           background.layer.cornerRadius = 5
           background.layer.borderWidth = 1
           background.layer.borderColor = :dimgray.uicolor.cgcolor
           background.backgroundColor = :black.uicolor
-
-          @color_sliders = ColorSliders.alloc.initWithFrame(background.bounds.shrink(10))
-          background << @color_sliders
-          @color_sliders.on :change {
-            color_did_change(@color_sliders.color)
-          }
         end
+        color_editor_modal << background
+
+        @color_names = UIScrollView.alloc.initWithFrame(background.bounds.shrink(10)).tap do |scroll|
+          typewriter = TypewriterView.alloc.initWithFrame([[0, 0], scroll.frame.size])
+          typewriter.centered = true
+          typewriter.scroll_view = scroll
+          typewriter.spacing = [2, 2]
+          typewriter.margin = [2, 2, 2, 2]
+          typewriter.backgroundColor = :black.uicolor
+          Symbol.css_colors.each do |css_name, color|
+            button = UIButton.rounded
+            button.tintColor = color.uicolor
+            button.setTitle(css_name, forState: :normal.uicontrolstate)
+            button.setTitleColor(color.uicolor, forState: :normal.uicontrolstate)
+            button.sizeToFit
+            button.on :touch {
+              color = css_name.uicolor
+              color_did_change(color)
+              @color_sliders.color = color
+            }
+            typewriter << button
+          end
+          scroll << typewriter
+        end
+
+        @color_sliders = ColorSliders.alloc.initWithFrame(background.bounds.shrink(10))
+        @color_sliders.on :change {
+          color_did_change(@color_sliders.color)
+        }
+
+        toolbar.canvas = background
+        toolbar.add('RGB', @color_sliders)
+        toolbar.add('Named', @color_names)
       end
       @color_editor_modal.frame = @color_editor_modal.frame.right(Kiln.app_bounds.width)
       @color_editor_modal.fade_out
@@ -76,8 +106,7 @@ module Kiln
     def update_views
       color = get_value
       @color_picker.color = color
-      alpha = (color && color.alpha < 1 ? " (a" << color.alpha.to_s << ")" : '')
-      @label_view.text = "#{@property}: #{color ? color.to_hex + alpha : 'nil'}"
+      @label_view.text = "#{@property}: #{color.inspect}"
     end
 
     def color_did_change(color)

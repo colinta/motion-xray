@@ -221,6 +221,7 @@ module Kiln
       when BlueSection
         b = amount
       when AlphaSection
+        amount = (amount * 100).round / 100.0
         a = amount
       end
 

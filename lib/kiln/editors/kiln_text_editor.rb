@@ -79,6 +79,7 @@ module Kiln
 
     def close_text_editor
       @text_editor.resignFirstResponder
+      update_text
       @text_editor_modal.fade_out
       @text_editor_modal.slide(:left) {
         @text_editor_modal.removeFromSuperview

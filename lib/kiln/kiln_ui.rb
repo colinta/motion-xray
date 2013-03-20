@@ -150,7 +150,7 @@ module Kiln
         @canvas.frame = [[0, canvas_top], [full_screen_width, canvas_height]]
         @bottom_half << @canvas
 
-        @toolbar = Toolbar.alloc.initWithFrame([[-1, toolbar_top], [full_screen_width + 2, toolbar_height + 1]])
+        @toolbar = PluginToolbar.alloc.initWithFrame([[-1, toolbar_top], [full_screen_width + 2, toolbar_height + 1]])
         @toolbar.canvas = @canvas
         @bottom_half << @toolbar
 
@@ -195,13 +195,13 @@ module Kiln
       if @selected && ! @selected.isDescendantOfView(Kiln.window)
         @selected = nil
       end
-      # reset plugins?
+
       select(Kiln.window) unless @selected
       if @target && ! @target.isDescendantOfView(Kiln.window)
         @target = nil
       end
       edit(Kiln.window) unless @target
-      Kiln.app_shared.setStatusBarHidden(true, withAnimation:UIStatusBarAnimationSlide)
+      reset
     end
 
     def cool_down
@@ -228,9 +228,7 @@ module Kiln
     end
 
     def choose_view
-      restore_shown_views = @revert[:views].reverse.map { |subview|
-        collect_views(subview)
-      }.flatten.select { |subview| !subview.hidden? }
+      restore_shown_views = collect_views
 
       @choose_view = UIView.alloc.initWithFrame(Kiln.window.bounds)
       @choose_view.backgroundColor = :black.uicolor
@@ -260,12 +258,6 @@ module Kiln
       Kiln.window << @choose_view
       @choose_view.fade_in
       timer = 0
-      # @choose_view.subviews.each do |subview|
-      #   timer.later do
-      #     subview.slide(:right, Kiln.window.bounds.width)
-      #   end
-      #   timer += 0.1
-      # end
     end
 
     def did_choose_view(view)
@@ -278,16 +270,24 @@ module Kiln
         subview.move_to([random_x, random_y], 1)
       end
       0.5.later do
-        @choose_view.fade_out
+        @choose_view.fade_out_and_remove
       end
       edit(view)
       select(view.superview || view)
     end
 
-    def collect_views(view)
-      view.kiln_subviews.reverse.map { |subview|
-        collect_views(subview)
-      }.flatten + [view]
+    def collect_views(view=nil)
+      if view
+        # join all the subviews
+        view.kiln_subviews.reverse.map { |subview|
+          collect_views(subview)
+        }.flatten + [view]
+      else
+        # start at the revert[:views] and collect all subviews
+        @revert[:views].reverse.map { |subview|
+          collect_views(subview)
+        }.flatten.select { |subview| !subview.hidden? }
+      end
     end
 
     def buttony_views(view)
@@ -362,6 +362,12 @@ module Kiln
         plugin.kiln_edit(target)
       end
       @target = target
+      reset
+    end
+
+    def reset
+      @toolbar.show
+      @canvas.contentOffset = [0, 0]
     end
 
     def back
@@ -408,6 +414,22 @@ module Kiln
           subview.layer.transform = teh_transform
         end
       end
+    end
+
+    def get_screenshot
+      scale = UIScreen.mainScreen.scale
+      UIGraphicsBeginImageContextWithOptions(App.window.bounds.size, false, scale)
+      context = UIGraphicsGetCurrentContext()
+
+      @revert[:views].each do |subview|
+        CGContextSaveGState(context)
+        CGContextTranslateCTM(context, subview.frame.origin.x, subview.frame.origin.y)
+        subview.layer.renderInContext(context)
+        CGContextRestoreGState(context)
+      end
+      image = UIGraphicsGetImageFromCurrentImageContext()
+      UIGraphicsEndImageContext()
+      return image
     end
 
   end
@@ -535,7 +557,7 @@ module Kiln
       self.backgroundColor = :clear.uicolor
       @timer.invalidate if @timer
       @timer = nil
-      0.5.later do
+      1.later do
         @label.fade_out
       end
     end

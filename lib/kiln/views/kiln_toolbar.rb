@@ -21,8 +21,9 @@ module Kiln
         @selected_view = SelectedToolbarItem.new
         @scroll_view << @selected_view
 
-        @selected = nil
-        @plugin_items = []
+        @index = nil
+        @toolbar_items = []
+        @views = []
         @item_x = margin
 
         recognizer = UITapGestureRecognizer.alloc.initWithTarget(self, action:'tapped:')
@@ -34,47 +35,84 @@ module Kiln
 
     def tapped(event)
       touched_x = event.locationInView(self).x + @scroll_view.contentOffset.x
-      touched = nil
-      @plugin_items.each_with_index do |items, index|
-        item = items[0]
+      touched_index = nil
+      @toolbar_items.each_with_index do |item, index|
         if touched_x < item.frame.max_x
-          touched = index
+          touched_index = index
           break
         end
       end
-      select(touched) if touched
+      select(touched_index) if touched_index
     end
 
     def margin
       10
     end
 
-    def add(plugin)
-      name = plugin.kiln_name
-      plugin_view = plugin.get_kiln_view_in(@canvas)
-
+    def add(name, plugin_view)
       toolbar_item = ToolbarItem.alloc.initWithText(name)
       toolbar_item.frame = toolbar_item.frame.right(@item_x).down(5)
       @item_x += toolbar_item.frame.width
       @item_x += margin
       @scroll_view << toolbar_item
       @scroll_view.contentSize = [@item_x, self.bounds.height]
-      @plugin_items << [toolbar_item, plugin]
+      @toolbar_items << toolbar_item
+      @views << plugin_view
 
-      unless @selected
+      unless @index
         select(0)
       end
     end
 
     def select(index)
-      toolbar_item, plugin = @plugin_items[index]
-      @selected = plugin
-
+      toolbar_item = @toolbar_items[index]
+      will_hide
+      @index = index
+      self.canvas.subviews.each &:removeFromSuperview
       UIView.animate {
         @selected_view.item = toolbar_item
       }
-      self.canvas.subviews.each &:removeFromSuperview
-      self.canvas << plugin.view
+      will_show
+
+      plugin_view = @views[@index]
+      self.canvas << plugin_view
+    end
+
+    def show
+      will_show
+    end
+
+    def will_hide
+    end
+
+    def will_show
+    end
+
+  end
+
+  class PluginToolbar < Toolbar
+
+    def initWithFrame(frame)
+      super.tap do
+        @plugin_items = []
+        @selected = nil
+      end
+    end
+
+    def add(plugin)
+      name = plugin.kiln_name
+      plugin_view = plugin.get_kiln_view_in(@canvas)
+      @plugin_items << plugin
+      super(name, plugin_view)
+    end
+
+    def will_hide
+      @selected.hide if @selected
+    end
+
+    def will_show
+      @selected = @plugin_items[@index]
+      @selected.show if @selected
     end
 
   end
