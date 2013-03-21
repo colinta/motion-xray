@@ -80,6 +80,7 @@ class << UIWindow
   def kiln
     @kiln ||= {
       'TurnOff' => {
+        frame: nil,
         hidden: nil,
         userInteractionEnabled: nil,
       },

@@ -23,7 +23,6 @@ module Kiln
   class UI
     attr :teh_ui
     attr :assign_button
-    attr :back_button
     attr :top_bar
     attr :bottom_bar
     attr :bottom_half
@@ -125,20 +124,22 @@ module Kiln
 
         @table = UITableView.alloc.initWithFrame(CGRect.empty, style: :plain.uitableviewstyle)
         @table.frame = [[0, bar_height], [half_screen_width, half_screen_height - bar_height * 2]]
-        @table.rowHeight = 20
+        @table.rowHeight = 30
         @table.delegate = self
+        @table.autoresizingMask = :full.uiautoresizemask
         @top_half << @table
 
         @top_bar = KilnHeaderBackground.alloc.initWithFrame([[0, 0], [half_screen_width, bar_height]])
+        @top_bar.autoresizingMask = :fixed_top.uiautoresizemask
         @top_bar.label = KilnHeaderLabel.alloc.initWithFrame(@top_bar.bounds.right(30).thinner(30))
+        @top_bar.label.autoresizingMask = :flexible_width.uiautoresizemask
 
-        @back_button = KilnDetailButton.alloc.init
-        @back_button.transform = CGAffineTransformMakeRotation(180.degrees)
-        @back_button.enabled = false
-        @back_button.on :touch {
-          back
+        @expand_button = KilnDetailButton.alloc.init
+        @expand_button.transform = CGAffineTransformMakeRotation(180.degrees)
+        @expand_button.on :touch {
+          toggle_picker
         }
-        @top_bar << @back_button
+        @top_bar << @expand_button
 
         @choose_button = UIButton.custom
         @choose_button.setImage('kiln_choose_button'.uiimage, forState: :normal.uicontrolstate)
@@ -149,12 +150,15 @@ module Kiln
         @choose_button.on :touch {
           choose_view
         }
+        @choose_button.autoresizingMask = :fixed_top_right.uiautoresizemask
         @top_bar << @choose_button
 
         @top_half << @top_bar
 
         @bottom_bar = KilnHeaderBackground.alloc.initWithFrame([[0, half_screen_height - bar_height], [half_screen_width, bar_height]])
         @bottom_bar.label = KilnHeaderLabel.alloc.initWithFrame(@bottom_bar.bounds.right(3).thinner(33))
+        @bottom_bar.label.autoresizingMask = :flexible_width.uiautoresizemask
+        @bottom_bar.autoresizingMask = :fixed_bottom.uiautoresizemask
         @top_half << @bottom_bar
 
         @assign_button = KilnDetailButton.alloc.init
@@ -163,6 +167,7 @@ module Kiln
         @assign_button.on :touch {
           edit(@selected) if @selected
         }
+        @assign_button.autoresizingMask = :fixed_bottom_right.uiautoresizemask
         @bottom_bar << @assign_button
 
         @bottom_half = UIView.alloc.initWithFrame([[0, bottom_half_top], [full_screen_width, bottom_half_height]])
@@ -229,11 +234,16 @@ module Kiln
       if @selected && ! @selected.isDescendantOfView(Kiln.window)
         @selected = nil
       end
-
-      select(Kiln.window) unless @selected
       if @target && ! @target.isDescendantOfView(Kiln.window)
         @target = nil
       end
+
+      subviews = view_tree
+      @table_source = KilnTableSource.new(@selected || Kiln.window, subviews)
+      @table.dataSource = @table_source
+      @table.delegate = self
+
+      select(Kiln.window) unless @selected
       edit(Kiln.window) unless @target
     end
 
@@ -259,6 +269,36 @@ module Kiln
       Kiln.window.rootViewController = @old_controller
       @old_controller = nil
       @revert = nil
+    end
+
+    def view_tree(view=nil, indent=nil, depth=0, is_last=true, return_views=[])
+      if view
+        subviews = view.kiln_subviews
+      else
+        view = Kiln.window
+        subviews = @revert[:views]
+      end
+
+      if indent
+        next_indent = indent.dup
+        if is_last
+          indent += '`-- '
+          next_indent += '    '
+        else
+          indent += '+-- '
+          next_indent += '|   '
+        end
+      else
+        indent = ''
+        next_indent = ''
+      end
+
+      return_views << {view: view, indent: indent}.to_object
+
+      subviews.each_with_index { |subview, index|
+        view_tree(subview, next_indent, depth + 1, index == subviews.length - 1, return_views)
+      }
+      return return_views
     end
 
     def choose_view
@@ -307,7 +347,7 @@ module Kiln
         @choose_view.fade_out_and_remove
       end
       edit(view)
-      select(view.superview || view)
+      select(view)
     end
 
     def collect_views(view=nil)
@@ -356,28 +396,10 @@ module Kiln
     end
 
     def select(selected)
-      select(selected, update:true)
-    end
-    def select(selected, update:update_table)
       return unless selected
 
       @selected = selected
-      SugarCube::Adjust::adjust(@selected)
-
-      if update_table
-        if @selected == Kiln.window
-          subviews = @revert[:views]
-        else
-          subviews = @selected.kiln_subviews
-        end
-        @top_bar.text = @selected.class.name
-        @table_source = KilnTableSource.new(@selected.superview, subviews)
-        @table.dataSource = @table_source
-        @table.delegate = self
-        @table.reloadSections([0].nsindexset, withRowAnimation: :fade.uitablerowanimation)
-
-        @back_button.enabled = !!@selected.superview
-      end
+      @top_bar.text = @selected.class.name
 
       UIView.animate {
         if @selected == Kiln.window
@@ -390,12 +412,14 @@ module Kiln
     end
 
     def edit(target)
+      collapse_picker
       @bottom_bar.text = target.to_s
 
       Kiln.plugins.each do |plugin|
         plugin.kiln_edit(target)
       end
       @target = target
+      SugarCube::Adjust::adjust(target)
       reset
     end
 
@@ -404,21 +428,38 @@ module Kiln
       @canvas.contentOffset = [0, 0]
     end
 
-    def back
-      select(@table_source.superview)
+    def toggle_picker
+      if @picker_is_expanded
+        collapse_picker
+      else
+        expand_picker
+      end
+    end
+
+    def expand_picker
+      return if @picker_is_expanded
+      UIView.animate {
+        @top_half.frame = [[0, 0], [full_screen_width, half_screen_height]]
+        @expand_button.transform = CGAffineTransformMakeRotation(0.degrees)
+      }
+      @picker_is_expanded = true
+    end
+
+    def collapse_picker
+      return unless @picker_is_expanded
+      UIView.animate {
+        @top_half.frame = [[half_screen_width, 0], [half_screen_width, half_screen_height]]
+        @expand_button.transform = CGAffineTransformMakeRotation(180.degrees)
+      }
+      @picker_is_expanded = false
     end
 
     def tableView(table_view, didSelectRowAtIndexPath:index_path)
-      table_selection = @table_source.subviews[index_path.row]
+      table_selection = @table_source.subviews[index_path.row].view
       if @selected == table_selection
-        table_view.deselectRowAtIndexPath(index_path, animated:true)
-        if table_selection.subviews.length > 0
-          select(table_selection)
-        else
-          edit(table_selection)
-        end
+        edit(table_selection)
       else
-        select(table_selection, update:false)
+        select(table_selection)
       end
     end
 
@@ -477,11 +518,11 @@ module Kiln
 
 
   class KilnTableSource
-    attr :superview
+    attr :selected
     attr :subviews
 
-    def initialize(superview, subviews)
-      @superview = superview
+    def initialize(selected, subviews)
+      @selected = selected
       @subviews = subviews
     end
 
@@ -507,20 +548,18 @@ module Kiln
       unless cell
         cell = KilnTableCell.alloc.initWithStyle(:default.uitablecellstyle,
                             reuseIdentifier: cell_identifier)
-        cell.kiln = table_view.delegate
       end
 
-      cell.textLabel.text = @subviews[index_path.row].to_s
+      view_info = @subviews[index_path.row]
+      view = view_info.view
+      cell.view = view
+      text = ''
+      indent = view_info.indent
+      text << indent << view.to_s
+      cell.textLabel.text = text
       cell.row = index_path.row
       cell.detail_button.off :touch
-      if @subviews[cell.row].subviews.length > 0
-        cell.detail_button.show
-        cell.detail_button.on :touch {
-          cell.kiln.select(@subviews[cell.row])
-        }
-      else
-        cell.detail_button.hide
-      end
+      cell.detail_button.hide
 
       return cell
     end
@@ -529,7 +568,7 @@ module Kiln
 
 
   class KilnTableCell < UITableViewCell
-    attr_accessor :kiln
+    attr_accessor :view
     attr_accessor :row
     attr :detail_button
 
@@ -540,6 +579,11 @@ module Kiln
         @detail_button = KilnDetailButton.alloc.init
         @detail_button.frame = [[143, -0.5], [17, 19]]
         contentView << @detail_button
+
+        self.detail_button.on :touch {
+          Kiln.ui.select(self.view) if self.view
+        }
+
       end
     end
 
