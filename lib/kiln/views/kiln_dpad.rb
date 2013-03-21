@@ -1,6 +1,6 @@
 module Kiln
 
-  class DPad < UIView
+  class KilnDpad < UIView
 
     def initWithFrame(frame)
       super.tap do

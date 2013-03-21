@@ -103,10 +103,10 @@ module Kiln
         @table.delegate = self
         @top_half << @table
 
-        @top_bar = HeaderBackground.alloc.initWithFrame([[0, 0], [half_screen_width, bar_height]])
-        @top_bar.label = HeaderLabel.alloc.initWithFrame(@top_bar.bounds.right(30).thinner(30))
+        @top_bar = KilnHeaderBackground.alloc.initWithFrame([[0, 0], [half_screen_width, bar_height]])
+        @top_bar.label = KilnHeaderLabel.alloc.initWithFrame(@top_bar.bounds.right(30).thinner(30))
 
-        @back_button = DetailButton.alloc.init
+        @back_button = KilnDetailButton.alloc.init
         @back_button.transform = CGAffineTransformMakeRotation(180.degrees)
         @back_button.enabled = false
         @back_button.on :touch {
@@ -127,11 +127,11 @@ module Kiln
 
         @top_half << @top_bar
 
-        @bottom_bar = HeaderBackground.alloc.initWithFrame([[0, half_screen_height - bar_height], [half_screen_width, bar_height]])
-        @bottom_bar.label = HeaderLabel.alloc.initWithFrame(@bottom_bar.bounds.right(3).thinner(33))
+        @bottom_bar = KilnHeaderBackground.alloc.initWithFrame([[0, half_screen_height - bar_height], [half_screen_width, bar_height]])
+        @bottom_bar.label = KilnHeaderLabel.alloc.initWithFrame(@bottom_bar.bounds.right(3).thinner(33))
         @top_half << @bottom_bar
 
-        @assign_button = DetailButton.alloc.init
+        @assign_button = KilnDetailButton.alloc.init
         @assign_button.transform = CGAffineTransformMakeRotation(90.degrees)
         @assign_button.frame = @assign_button.frame.x(half_screen_width - @assign_button.frame.width)
         @assign_button.on :touch {
@@ -303,7 +303,7 @@ module Kiln
       f.size.height *= 2
       # f = f.left(Kiln.window.bounds.width)
 
-      btn = ChooseViewButton.alloc.initWithFrame(f)
+      btn = KilnChooseViewButton.alloc.initWithFrame(f)
       btn.target = view
       btn.on(:touch_down_repeat) {
         did_choose_view(view)
@@ -465,7 +465,7 @@ module Kiln
       cell = table_view.dequeueReusableCellWithIdentifier(cell_identifier)
 
       unless cell
-        cell = Kiln::TableCell.alloc.initWithStyle(:default.uitablecellstyle,
+        cell = KilnTableCell.alloc.initWithStyle(:default.uitablecellstyle,
                             reuseIdentifier: cell_identifier)
         cell.kiln = table_view.delegate
       end
@@ -488,7 +488,7 @@ module Kiln
   end
 
 
-  class TableCell < UITableViewCell
+  class KilnTableCell < UITableViewCell
     attr_accessor :kiln
     attr_accessor :row
     attr :detail_button
@@ -497,7 +497,7 @@ module Kiln
       super.tap do
         textLabel.font = UIFont.systemFontOfSize(10)
         textLabel.lineBreakMode = :clip.uilinebreakmode
-        @detail_button = DetailButton.alloc.init
+        @detail_button = KilnDetailButton.alloc.init
         @detail_button.frame = [[143, -0.5], [17, 19]]
         contentView << @detail_button
       end
@@ -505,7 +505,7 @@ module Kiln
 
   end
 
-  class DetailButton < UIButton
+  class KilnDetailButton < UIButton
 
     def init
       initWithFrame([[0, 0], [27, 29]])
@@ -523,7 +523,7 @@ module Kiln
 
   end
 
-  class ChooseViewButton < UIButton
+  class KilnChooseViewButton < UIButton
     attr_accessor :label
     attr_accessor :target
     attr_accessor :children

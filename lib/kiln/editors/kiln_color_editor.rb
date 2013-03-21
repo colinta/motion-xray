@@ -13,7 +13,7 @@ module Kiln
         end
         color_editor_modal << close_editor_control
 
-        toolbar = Toolbar.alloc.initWithFrame(canvas_bounds.shrink(ColorEditorMargin).height(25).up(25))
+        toolbar = KilnToolbar.alloc.initWithFrame(canvas_bounds.shrink(ColorEditorMargin).height(25).up(25))
         toolbar.layer.cornerRadius = 3
         color_editor_modal << toolbar
         background = UIView.alloc.initWithFrame(canvas_bounds.shrink(ColorEditorMargin)).tap do |background|
@@ -47,7 +47,7 @@ module Kiln
           scroll << typewriter
         end
 
-        @color_sliders = ColorSliders.alloc.initWithFrame(background.bounds.shrink(10))
+        @color_sliders = KilnColorSliders.alloc.initWithFrame(background.bounds.shrink(10))
         @color_sliders.on :change {
           color_did_change(@color_sliders.color)
         }

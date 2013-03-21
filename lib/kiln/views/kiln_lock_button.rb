@@ -1,6 +1,6 @@
 module Kiln
 
-  class LockButton < UIButton
+  class KilnLockButton < UIButton
     States = 4
     LockedState = 0
     UnlockedState = 1

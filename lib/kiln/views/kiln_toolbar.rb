@@ -2,7 +2,7 @@ module Kiln
 
   # Toolbar is a terrible name.  It's more of a "tab bar", but that name was
   # taken.  Plus, I dunno, maybe I'll add other tools to it!
-  class Toolbar < UIView
+  class KilnToolbar < UIView
     attr_accessor :canvas
     attr_accessor :selected
 
@@ -18,7 +18,7 @@ module Kiln
 
         @scroll_view = UIScrollView.alloc.initWithFrame(bounds)
         self << @scroll_view
-        @selected_view = SelectedToolbarItem.new
+        @selected_view = KilnSelectedToolbarItem.new
         @scroll_view << @selected_view
 
         @index = nil
@@ -50,7 +50,7 @@ module Kiln
     end
 
     def add(name, plugin_view)
-      toolbar_item = ToolbarItem.alloc.initWithText(name)
+      toolbar_item = KilnToolbarItem.alloc.initWithText(name)
       toolbar_item.frame = toolbar_item.frame.right(@item_x).down(5)
       @item_x += toolbar_item.frame.width
       @item_x += margin
@@ -90,7 +90,7 @@ module Kiln
 
   end
 
-  class PluginToolbar < Toolbar
+  class PluginToolbar < KilnToolbar
 
     def initWithFrame(frame)
       super.tap do
@@ -117,7 +117,7 @@ module Kiln
 
   end
 
-  class SelectedToolbarItem < UIView
+  class KilnSelectedToolbarItem < UIView
     attr :item
 
     def initWithFrame(frame)
@@ -150,7 +150,7 @@ module Kiln
 
   end
 
-  class ToolbarItem < UILabel
+  class KilnToolbarItem < UILabel
     attr :name
 
     def initWithText(text)

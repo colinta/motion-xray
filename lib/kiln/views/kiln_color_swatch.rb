@@ -13,7 +13,7 @@ module Kiln
 
         swatch_rect = gradient_view.bounds.shrink(3)
 
-        gradient_view << TriangleSwatch.alloc.initWithFrame(swatch_rect)
+        gradient_view << KilnTriangleSwatch.alloc.initWithFrame(swatch_rect)
 
         @color_swatch = UIView.alloc.initWithFrame(swatch_rect).tap do |color_swatch|
           color_swatch.layer.borderWidth = 1
@@ -46,7 +46,7 @@ module Kiln
 
   end
 
-  class TriangleSwatch < UIView
+  class KilnTriangleSwatch < UIView
 
     def drawRect(rect)
       context = UIGraphicsGetCurrentContext()
@@ -70,14 +70,14 @@ module Kiln
 
   end
 
-  class ColorSliders < UIControl
+  class KilnColorSliders < UIControl
     attr_reader :color
 
     def initWithFrame(frame)
       super.tap do
         self.backgroundColor = :black.uicolor
         @color = :clear.uicolor
-        @triangle = TriangleSwatch.alloc.initWithFrame(CGRect.empty)
+        @triangle = KilnTriangleSwatch.alloc.initWithFrame(CGRect.empty)
       end
     end
 

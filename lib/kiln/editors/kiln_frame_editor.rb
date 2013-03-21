@@ -37,15 +37,15 @@ module Kiln
         update_frame
         frame_view << values_view
 
-        origin_dpad = DPad.alloc.initWithFrame([[100, 4], [72, 72]])
+        origin_dpad = KilnDpad.alloc.initWithFrame([[100, 4], [72, 72]])
         origin_dpad.add_listener(self, :change_origin)
         view << origin_dpad
 
-        size_dpad = DPad.alloc.initWithFrame([[176, 4], [72, 72]])
+        size_dpad = KilnDpad.alloc.initWithFrame([[176, 4], [72, 72]])
         size_dpad.add_listener(self, :change_size)
         view << size_dpad
 
-        @locked_button = LockButton.alloc.init
+        @locked_button = KilnLockButton.alloc.init
         @locked_button.frame = @locked_button.frame.x(252).y(27)
         view << @locked_button
       end
@@ -60,14 +60,14 @@ module Kiln
     end
 
     def change_origin(delta)
-      if @locked_button.lock_state == LockButton::LockedState
+      if @locked_button.lock_state == KilnLockButton::LockedState
         return
       end
 
-      if @locked_button.lock_state == LockButton::LockedHorizontalState
+      if @locked_button.lock_state == KilnLockButton::LockedHorizontalState
         delta.y = 0
       end
-      if @locked_button.lock_state == LockButton::LockedVerticalState
+      if @locked_button.lock_state == KilnLockButton::LockedVerticalState
         delta.x = 0
       end
 
@@ -80,14 +80,14 @@ module Kiln
     end
 
     def change_size(delta)
-      if @locked_button.lock_state == LockButton::LockedState
+      if @locked_button.lock_state == KilnLockButton::LockedState
         return
       end
 
-      if @locked_button.lock_state == LockButton::LockedHorizontalState
+      if @locked_button.lock_state == KilnLockButton::LockedHorizontalState
         delta.y = 0
       end
-      if @locked_button.lock_state == LockButton::LockedVerticalState
+      if @locked_button.lock_state == KilnLockButton::LockedVerticalState
         delta.x = 0
       end
 

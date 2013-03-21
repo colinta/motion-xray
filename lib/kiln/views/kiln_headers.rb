@@ -1,6 +1,6 @@
 module Kiln
 
-  class HeaderBackground < UIView
+  class KilnHeaderBackground < UIView
     attr_accessor :label
 
     def initWithFrame(frame)
@@ -25,7 +25,7 @@ module Kiln
 
   end
 
-  class HeaderLabel < UILabel
+  class KilnHeaderLabel < UILabel
 
     def initWithFrame(frame)
       super.tap do
@@ -38,7 +38,7 @@ module Kiln
 
   end
 
-  class SectionHeader < UIControl
+  class KilnSectionHeader < UIControl
     attr_accessor :text
     attr :tracking_view
 

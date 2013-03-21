@@ -21,7 +21,7 @@ module Kiln
       properties = @target.kiln
       sections = properties.keys
       properties.each do |section, editors|
-        section_view = SectionHeader.alloc.initWithFrame([[0, 0], [Kiln.ui.full_screen_width, 20]])
+        section_view = KilnSectionHeader.alloc.initWithFrame([[0, 0], [Kiln.ui.full_screen_width, 20]])
         section_view.text = section
         @editors << section_view
         editors.each do |property, editor_class|
