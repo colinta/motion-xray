@@ -1,6 +1,6 @@
 module Kiln
   # Copied from the gem of the same name, but I didn't want the dependency
-  class TypewriterView < UIView
+  class KilnTypewriterView < UIView
     attr_accessor :scroll_view
     attr_accessor :background_view
 

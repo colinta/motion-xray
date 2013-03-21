@@ -1,6 +1,6 @@
 module Kiln
 
-  class GradientView < UIView
+  class KilnGradientView < UIView
     attr_accessor :start_color
     attr_accessor :final_color
 

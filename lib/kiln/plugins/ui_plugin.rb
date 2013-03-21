@@ -8,7 +8,7 @@ module Kiln
     end
 
     def kiln_view_in(canvas)
-      @editors = Kiln::TypewriterView.alloc.initWithFrame(canvas.bounds)
+      @editors = Kiln::KilnTypewriterView.alloc.initWithFrame(canvas.bounds)
       @editors.scroll_view = canvas
       @editors
     end

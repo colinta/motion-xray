@@ -25,7 +25,7 @@ module Kiln
         color_editor_modal << background
 
         @color_names = UIScrollView.alloc.initWithFrame(background.bounds.shrink(10)).tap do |scroll|
-          typewriter = TypewriterView.alloc.initWithFrame([[0, 0], scroll.frame.size])
+          typewriter = KilnTypewriterView.alloc.initWithFrame([[0, 0], scroll.frame.size])
           typewriter.centered = true
           typewriter.scroll_view = scroll
           typewriter.spacing = [2, 2]
@@ -61,7 +61,7 @@ module Kiln
 
       return UIView.alloc.initWithFrame([[0, 0], [rect.width, 34]]).tap do |view|
         color_size = CGSize.new(50, 24)
-        @color_picker = ColorSwatch.alloc.initWithFrame([[4, 4], color_size])
+        @color_picker = KilnColorSwatch.alloc.initWithFrame([[4, 4], color_size])
         @color_picker.color = get_value
         view << @color_picker
 

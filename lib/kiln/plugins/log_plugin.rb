@@ -103,7 +103,7 @@ module Kiln
         # send email button
         if MFMailComposeViewController.canSendMail
           email_button = UIButton.custom
-          email_button.setImage('kiln_email_button', forState: :normal.uicontrolstate)
+          email_button.setImage('kiln_email_button'.uiimage, forState: :normal.uicontrolstate)
           email_button.frame = [[0, button_y], [ActionsWidth, ActionsWidth]]
           email_button.on :touch {
             mail_view_controller = MFMailComposeViewController.new

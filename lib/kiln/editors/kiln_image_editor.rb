@@ -31,7 +31,7 @@ module Kiln
 
       return UIView.alloc.initWithFrame([[0, 0], [rect.width, 34]]).tap do |view|
         image_size = CGSize.new(50, 24)
-        @image_thumbnail = ColorSwatch.alloc.initWithFrame([[4, 4], image_size])
+        @image_thumbnail = KilnColorSwatch.alloc.initWithFrame([[4, 4], image_size])
         @image_thumbnail.image = get_value
         view << @image_thumbnail
 

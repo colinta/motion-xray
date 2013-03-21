@@ -46,7 +46,7 @@ module Kiln
       super.tap do
         @exposed = true
         @pressed = false
-        @tracking_view = TypewriterView.alloc.initWithFrame([[0, 0], [self.frame.size.width, 0]])
+        @tracking_view = KilnTypewriterView.alloc.initWithFrame([[0, 0], [self.frame.size.width, 0]])
       end
     end
 

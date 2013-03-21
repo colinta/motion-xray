@@ -1,10 +1,10 @@
 module Kiln
 
-  class ColorSwatch < UIControl
+  class KilnColorSwatch < UIControl
 
     def initWithFrame(frame)
       super.tap do
-        gradient_view = GradientView.alloc.initWithFrame(self.bounds).tap do |gradient_view|
+        gradient_view = KilnGradientView.alloc.initWithFrame(self.bounds).tap do |gradient_view|
           gradient_view.layer.borderWidth = 1
           gradient_view.layer.borderColor = :gray.uicolor.CGColor
           gradient_view.userInteractionEnabled = false
