@@ -175,6 +175,8 @@ module Kiln
       @fired = true
       Kiln.window.first_responder && Kiln.window.first_responder.resignFirstResponder
 
+      @current_orientation = UIDevice.currentDevice.orientation
+      UIDevice.currentDevice.beginGeneratingDeviceOrientationNotifications
       UIDeviceOrientationDidChangeNotification.add_observer(self, :'orientation_changed:')
 
       # gather all window subviews into 'revert_view'
@@ -202,7 +204,6 @@ module Kiln
         @target = nil
       end
       edit(Kiln.window) unless @target
-      reset
     end
 
     def cool_down
@@ -210,6 +211,7 @@ module Kiln
       @fired = false
 
       UIDeviceOrientationDidChangeNotification.remove_observer(self)
+      UIDevice.currentDevice.endGeneratingDeviceOrientationNotifications
 
       @selector.fade_out
       @top_half.slide(:right, half_screen_width)
@@ -390,6 +392,8 @@ module Kiln
     end
 
     def orientation_changed(notification)
+      return if @current_orientation == UIDevice.currentDevice.orientation
+      @current_orientation = UIDevice.currentDevice.orientation
       apply_transform
       select(@selected)
       edit(@target)

@@ -92,7 +92,7 @@ module Kiln
         button_y = 0
         clear_button = UIButton.custom
         clear_button.setImage('kiln_clear_button'.uiimage, forState: :normal.uicontrolstate)
-        clear_button.frame = [[0, button_y], [ActionsWidth, ActionsWidth]]
+        clear_button.frame = [[@toggle_actions_button.frame.width, button_y], [ActionsWidth, ActionsWidth]]
         clear_button.on :touch {
           LogPlugin.clear!
           update_log
@@ -104,12 +104,13 @@ module Kiln
         if MFMailComposeViewController.canSendMail
           email_button = UIButton.custom
           email_button.setImage('kiln_email_button'.uiimage, forState: :normal.uicontrolstate)
-          email_button.frame = [[0, button_y], [ActionsWidth, ActionsWidth]]
+          email_button.frame = [[@toggle_actions_button.frame.width, button_y], [ActionsWidth, ActionsWidth]]
           email_button.on :touch {
             mail_view_controller = MFMailComposeViewController.new
             mail_view_controller.mailComposeDelegate = self
             mail_view_controller.setSubject('From kiln.')
-            mail_view_controller.setMessageBody(LogPlugin.log.map{ |line| line.string }.join("\n"), isHTML:false)
+            mail_view_controller.setMessageBody(LogPlugin.log.map{ |line| line[:message].string }.join("\n"), isHTML:false)
+            Kiln.cool_down
             present_modal mail_view_controller
           }
           actions_container << email_button
@@ -189,11 +190,11 @@ module Kiln
 
     def update_log(notification=nil)
       if @text_view
+        log = NSMutableAttributedString.alloc.init
         if notification
-          log = NSMutableAttributedString.alloc.initWithAttributeString(@text_view.attributedText)
-          append_entry(log, @text_view.userInfo)
+          log.appendAttributedString(@text_view.attributedText)
+          append_entry(log, notification.userInfo)
         else
-          log = NSMutableAttributedString.alloc.init
           LogPlugin.log.each do |msg|
             append_entry(log, msg)
           end
@@ -215,7 +216,9 @@ module Kiln
     end
 
     def mailComposeController(controller, didFinishWithResult:result)
-      dismiss_modal
+      dismiss_modal {
+        Kiln.fire_up
+      }
     end
 
   end

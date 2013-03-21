@@ -92,10 +92,12 @@ module Kiln
         properties.each do |property, value|
           encoded = PersistUIPlugin.encode(:teacup, value)
           if encoded
-            if @target.stylename
-              text << "Teacup::Stylesheet[#{@target.stylesheet.name.inspect}].style #{view.stylename.inspect}, { #{property}: #{encoded}}\n"
-            else
-              text << "Teacup::Stylesheet[#{@target.stylesheet.name.inspect}].style #{view.class.name}, { #{property}: #{encoded}}\n"
+            if @target.stylesheet
+              if @target.stylename
+                text << "Teacup::Stylesheet[#{@target.stylesheet.name.inspect}].style #{view.stylename.inspect}, { #{property}: #{encoded}}\n"
+              else
+                text << "Teacup::Stylesheet[#{@target.stylesheet.name.inspect}].style #{view.class.name}, { #{property}: #{encoded}}\n"
+              end
             end
           end
         end
