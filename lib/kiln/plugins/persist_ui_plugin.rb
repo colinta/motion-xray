@@ -3,6 +3,14 @@ module Kiln
   class PersistUIPlugin < Plugin
     name 'Save UI'
 
+    def initialize(type=nil)
+      @type = type
+    end
+
+    def type
+      @type || :teacup
+    end
+
     class << self
 
       # @param format [Symbol] :teacup or :pixate
@@ -64,6 +72,9 @@ module Kiln
     def kiln_view_in(canvas)
       @log = UITextView.alloc.initWithFrame(canvas.bounds)
       @log.editable = false
+      @log.font = :monospace.uifont
+      @log.textColor = 0xBCBEAB.uicolor
+      @log.backgroundColor = 0x2b2b2b.uicolor
       return @log
     end
 
@@ -87,25 +98,45 @@ module Kiln
     end
 
     def show
-      text = ''
+      if type
+        @log.text = send("#{type}_text")
+      end
+    end
+
+    def teacup_text
+      apply = {}
       @changes.each do |view, properties|
         properties.each do |property, value|
           encoded = PersistUIPlugin.encode(:teacup, value)
           if encoded
-            if @target.stylesheet
-              if @target.stylename
-                text << "Teacup::Stylesheet[#{@target.stylesheet.name.inspect}].style #{view.stylename.inspect}, { #{property}: #{encoded}}\n"
-              else
-                text << "Teacup::Stylesheet[#{@target.stylesheet.name.inspect}].style #{view.class.name}, { #{property}: #{encoded}}\n"
-              end
-            end
+            apply[view] ||= []
+            apply[view] << [property, encoded]
           end
         end
       end
-      @log.text = text
+
+      text = ''
+      apply.each do |view, stuff|
+        first_line = true
+        if view.stylesheet && view.stylename
+          name = "Teacup::Stylesheet[#{view.stylesheet.name.inspect}].style #{view.stylename.inspect},\n  "
+        else
+          name = "#{view.class.name.downcase}.style "
+        end
+
+        text << "#{name}"
+        stuff.each do |property, encoded|
+          unless first_line
+            text << ",\n  "
+          end
+          text << "#{property}: #{encoded}"
+          first_line = false
+        end
+        text << "\n\n"
+      end
+      return text
     end
 
   end
 
 end
-
