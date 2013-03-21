@@ -5,7 +5,11 @@ module Kiln
 
     class << self
       def log
-        @log ||= []
+        @log || clear!
+      end
+
+      def clear!
+        @log = []
       end
 
       def add_log(type, args)
@@ -54,8 +58,9 @@ module Kiln
           NSLog(nslog)
         end
 
-        log << {message:log_message, date:NSDate.new}
-        LogChangedNotification.post_notification
+        entry = {message:log_message, date:NSDate.new}
+        log << entry
+        LogChangedNotification.post_notification(nil, entry)
       end
     end
 
@@ -83,9 +88,33 @@ module Kiln
 
       btn_width = @toggle_actions_button.frame.width
       actions_frame = [[canvas.bounds.width - btn_width, 0], [ActionsWidth + btn_width, 259]]
-      @actions_container = UIView.alloc.initWithFrame(actions_frame).tap do |actions|
+      @actions_container = UIView.alloc.initWithFrame(actions_frame).tap do |actions_container|
+        button_y = 0
         clear_button = UIButton.custom
-        clear_button.
+        clear_button.setImage('kiln_clear_button', forState: :normal.uicontrolstate)
+        clear_button.frame = [[0, button_y], [ActionsWidth, ActionsWidth]]
+        clear_button.on :touch {
+          LogPlugin.clear!
+          update_log
+        }
+        actions_container << clear_button
+        button_y += ActionsWidth
+
+        # send email button
+        if MFMailComposeViewController.canSendMail
+          email_button = UIButton.custom
+          email_button.setImage('kiln_email_button', forState: :normal.uicontrolstate)
+          email_button.frame = [[0, button_y], [ActionsWidth, ActionsWidth]]
+          email_button.on :touch {
+            mail_view_controller = MFMailComposeViewController.new
+            mail_view_controller.mailComposeDelegate = self
+            mail_view_controller.setSubject('From kiln.')
+            mail_view_controller.setMessageBody(LogPlugin.log.map{ |line| line.string }.join("\n"), isHTML:false)
+            present_modal mail_view_controller
+          }
+          actions_container << email_button
+          button_y += ActionsWidth
+        end
       end
       @actions_container << @toggle_actions_button
 
@@ -160,20 +189,33 @@ module Kiln
 
     def update_log(notification=nil)
       if @text_view
-        log = NSMutableAttributedString.alloc.init
-        LogPlugin.log.each do |msg|
-          if @showing_datetimes
-            date = msg[:date].string_with_format(:iso8601)
-            log.appendAttributedString(NSMutableAttributedString.alloc.initWithString("#{date} ", attributes: {
-              NSForegroundColorAttributeName => 0xBCBEAB.uicolor,
-            }))
+        if notification
+          log = NSMutableAttributedString.alloc.initWithAttributeString(@text_view.attributedText)
+          append_entry(log, @text_view.userInfo)
+        else
+          log = NSMutableAttributedString.alloc.init
+          LogPlugin.log.each do |msg|
+            append_entry(log, msg)
           end
-          log.appendAttributedString(msg[:message])
         end
         # this can't be set in LogPlugin.add_log (font is not available during startup)
         log.addAttribute(NSFontAttributeName, value: :monospace.uifont(10), range:NSRange.new(0, log.length))
         @text_view.attributedText = log
       end
+    end
+
+    def append_entry(log, entry)
+      if @showing_datetimes
+        date = entry[:date].string_with_format(:iso8601)
+        log.appendAttributedString(NSMutableAttributedString.alloc.initWithString("#{date} ", attributes: {
+          NSForegroundColorAttributeName => 0xBCBEAB.uicolor,
+        }))
+      end
+      log.appendAttributedString(entry[:message])
+    end
+
+    def mailComposeController(controller, didFinishWithResult:result)
+      dismiss_modal
     end
 
   end

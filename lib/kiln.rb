@@ -22,4 +22,5 @@ Motion::Project::App.setup do |app|
   end
 
   app.resources_dirs << File.join(File.dirname(__FILE__), 'resources')
+  app.frameworks << 'MessageUI'
 end
