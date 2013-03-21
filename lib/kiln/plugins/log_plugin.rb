@@ -91,7 +91,7 @@ module Kiln
       @actions_container = UIView.alloc.initWithFrame(actions_frame).tap do |actions_container|
         button_y = 0
         clear_button = UIButton.custom
-        clear_button.setImage('kiln_clear_button', forState: :normal.uicontrolstate)
+        clear_button.setImage('kiln_clear_button'.uiimage, forState: :normal.uicontrolstate)
         clear_button.frame = [[0, button_y], [ActionsWidth, ActionsWidth]]
         clear_button.on :touch {
           LogPlugin.clear!
