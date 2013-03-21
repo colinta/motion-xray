@@ -78,7 +78,6 @@ module Kiln
 
     def close_text_editor
       @text_editor.resignFirstResponder
-      update_text
       @text_editor_modal.fade_out
       @text_editor_modal.slide(:left) {
         @text_editor_modal.removeFromSuperview
@@ -86,6 +85,7 @@ module Kiln
         @text_editor_modal.frame = @text_editor_modal.frame.x(Kiln.app_bounds.width)
         @open_text_button.userInteractionEnabled = true
         set_value(@text_editor.text)
+        update_text
       }
     end
 
