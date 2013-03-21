@@ -423,7 +423,7 @@ module Kiln
 
     def get_screenshot
       scale = UIScreen.mainScreen.scale
-      UIGraphicsBeginImageContextWithOptions(App.window.bounds.size, false, scale)
+      UIGraphicsBeginImageContextWithOptions(Kiln.window.bounds.size, false, scale)
       context = UIGraphicsGetCurrentContext()
 
       @revert[:views].each do |subview|

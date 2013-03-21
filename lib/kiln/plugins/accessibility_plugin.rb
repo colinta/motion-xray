@@ -85,7 +85,7 @@ module Kiln
       }
 
       scale = UIScreen.mainScreen.scale
-      UIGraphicsBeginImageContextWithOptions(App.window.bounds.size, false, scale)
+      UIGraphicsBeginImageContextWithOptions(Kiln.window.bounds.size, false, scale)
       context = UIGraphicsGetCurrentContext()
 
       views.reverse.each do |subview|
