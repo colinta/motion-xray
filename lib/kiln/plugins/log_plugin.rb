@@ -111,7 +111,7 @@ module Kiln
             mail_view_controller.setSubject('From kiln.')
             mail_view_controller.setMessageBody(LogPlugin.log.map{ |line| line[:message].string }.join("\n"), isHTML:false)
             Kiln.cool_down
-            present_modal mail_view_controller
+            SugarCube::Modal.present_modal mail_view_controller
           }
           actions_container << email_button
           button_y += ActionsWidth
@@ -216,7 +216,7 @@ module Kiln
     end
 
     def mailComposeController(controller, didFinishWithResult:result)
-      dismiss_modal {
+      SugarCube::Modal.dismiss_modal {
         Kiln.fire_up
       }
     end

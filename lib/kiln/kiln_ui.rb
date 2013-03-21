@@ -1,5 +1,27 @@
 module Kiln
+
+  class KilnViewController < UIViewController
+
+    def loadView
+      self.view = Kiln.ui.teh_ui
+    end
+
+    def supportedInterfaceOrientations
+      UIInterfaceOrientationPortrait
+    end
+
+    def shouldAutorotate
+      false
+    end
+
+    def willAnimateRotationToInterfaceOrientation(orientation, duration:duration)
+      Kiln.ui.update_orientation
+    end
+
+  end
+
   class UI
+    attr :teh_ui
     attr :assign_button
     attr :back_button
     attr :top_bar
@@ -77,8 +99,12 @@ module Kiln
     def build_the_ui
       unless @teh_ui
         @teh_ui = UIView.alloc.initWithFrame(Kiln.window.bounds)
+        @kiln_controller = KilnViewController.new
 
-        @cover = UIControl.alloc.initWithFrame(@teh_ui.bounds)
+        @tiny_view = UIView.alloc.initWithFrame([[0, 0], [half_screen_width, half_screen_height]])
+        @teh_ui << @tiny_view
+
+        @cover = UIControl.alloc.initWithFrame([[0, 0], [half_screen_width, half_screen_height]])
         @cover.on :touch {
           Kiln.cool_down
           2.seconds.later do
@@ -94,7 +120,7 @@ module Kiln
         @selector.layer.opacity = 0
         @teh_ui << @selector
 
-        @top_half = UIView.alloc.initWithFrame([[0, 0], [half_screen_width, half_screen_height]])
+        @top_half = UIView.alloc.initWithFrame([[half_screen_width, 0], [half_screen_width, half_screen_height]])
         @teh_ui << @top_half
 
         @table = UITableView.alloc.initWithFrame(CGRect.empty, style: :plain.uitableviewstyle)
@@ -159,6 +185,10 @@ module Kiln
         end
       end
 
+      @tiny_view.subviews.each &:removeFromSuperview
+    end
+
+    def transition_ui
       @selector.fade_in
 
       @top_half.frame = @top_half.frame.x(full_screen_width)
@@ -166,18 +196,12 @@ module Kiln
 
       @bottom_half.frame = @bottom_half.frame.y(full_screen_height)
       @bottom_half.slide :up, bottom_half_height
-
-      Kiln.window << @teh_ui
     end
 
     def fire_up
       return if @fired
       @fired = true
       Kiln.window.first_responder && Kiln.window.first_responder.resignFirstResponder
-
-      @current_orientation = UIDevice.currentDevice.orientation
-      UIDevice.currentDevice.beginGeneratingDeviceOrientationNotifications
-      UIDeviceOrientationDidChangeNotification.add_observer(self, :'orientation_changed:')
 
       # gather all window subviews into 'revert_view'
       @revert = {
@@ -193,6 +217,13 @@ module Kiln
       Kiln.app_shared.setStatusBarHidden(true, withAnimation:UIStatusBarAnimationSlide)
 
       build_the_ui
+      @old_controller = Kiln.window.rootViewController
+      Kiln.window.rootViewController = @kiln_controller
+      @revert[:views].each do |view|
+        @tiny_view << view
+      end
+
+      transition_ui
       apply_transform(true)
 
       if @selected && ! @selected.isDescendantOfView(Kiln.window)
@@ -210,9 +241,6 @@ module Kiln
       return unless @fired
       @fired = false
 
-      UIDeviceOrientationDidChangeNotification.remove_observer(self)
-      UIDevice.currentDevice.endGeneratingDeviceOrientationNotifications
-
       @selector.fade_out
       @top_half.slide(:right, half_screen_width)
       @bottom_half.slide(:down, bottom_half_height) {
@@ -220,6 +248,7 @@ module Kiln
       }
 
       @revert[:views].each do |subview|
+        Kiln.window << subview
         UIView.animate {
           # identity matrix
           subview.layer.transform = @revert[:transforms][subview]
@@ -227,6 +256,8 @@ module Kiln
         }
       end
       Kiln.app_shared.setStatusBarHidden(@revert[:status_bar_was_hidden?], withAnimation:UIStatusBarAnimationSlide)
+      Kiln.window.rootViewController = @old_controller
+      @old_controller = nil
       @revert = nil
     end
 
@@ -340,7 +371,7 @@ module Kiln
           subviews = @selected.kiln_subviews
         end
         @top_bar.text = @selected.class.name
-        @table_source = Kiln::TableSource.new(@selected.superview, subviews)
+        @table_source = KilnTableSource.new(@selected.superview, subviews)
         @table.dataSource = @table_source
         @table.delegate = self
         @table.reloadSections([0].nsindexset, withRowAnimation: :fade.uitablerowanimation)
@@ -391,9 +422,14 @@ module Kiln
       end
     end
 
-    def orientation_changed(notification)
-      return if @current_orientation == UIDevice.currentDevice.orientation
-      @current_orientation = UIDevice.currentDevice.orientation
+    def update_orientation(animate=true)
+      case UIApplication.sharedApplication.statusBarOrientation
+      when UIInterfaceOrientationPortrait
+      when UIInterfaceOrientationPortraitUpsideDown
+      when UIInterfaceOrientationLandscapeLeft
+      when UIInterfaceOrientationLandscapeRight
+      end
+
       apply_transform
       select(@selected)
       edit(@target)
@@ -440,7 +476,7 @@ module Kiln
   end
 
 
-  class TableSource
+  class KilnTableSource
     attr :superview
     attr :subviews
 
