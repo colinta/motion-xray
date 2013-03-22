@@ -38,7 +38,7 @@ module Kiln
         view << label_view
 
         @open_text_button = UIButton.custom.tap do |button|
-          button.setImage('kiln_icon_edit'.uiimage, forState: :normal.uicontrolstate)
+          button.setImage('kiln_edit_button'.uiimage, forState: :normal.uicontrolstate)
           button.frame = view.bounds
           button.sizeToFit
           button.frame = button.frame.x(view.bounds.top_right.x - button.frame.width)
