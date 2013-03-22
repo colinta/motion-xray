@@ -408,6 +408,10 @@ module Kiln
 
       @selected = selected
       @top_bar.text = @selected.class.name
+      index = @table_source.subviews.index { |item| item.view == @selected }
+      index_path = [0, index].nsindexpath
+      @table.selectRowAtIndexPath(index_path, animated:true, scrollPosition:UITableViewScrollPositionNone)
+      @table.scrollToRowAtIndexPath(index_path, atScrollPosition: UITableViewScrollPositionNone, animated:true)
 
       UIView.animate {
         if @selected == Kiln.window
