@@ -254,6 +254,9 @@ module Kiln
       @selector.fade_out
       @top_half.slide(:right, half_screen_width)
       @bottom_half.slide(:down, bottom_half_height) {
+        Kiln.window.rootViewController = @old_controller
+        @old_controller = nil
+
         @teh_ui.removeFromSuperview
       }
 
@@ -266,8 +269,6 @@ module Kiln
         }
       end
       Kiln.app_shared.setStatusBarHidden(@revert[:status_bar_was_hidden?], withAnimation:UIStatusBarAnimationSlide)
-      Kiln.window.rootViewController = @old_controller
-      @old_controller = nil
       @revert = nil
     end
 
@@ -317,17 +318,23 @@ module Kiln
         subview.show
       end
 
-      label = UILabel.alloc.initWithFrame(@choose_view.bounds)
+      label = UILabel.alloc.initWithFrame([[5, 5], [0, 0]])
       label.backgroundColor = :clear.uicolor
       label.textColor = :white.uicolor
-      label.textAlignment = :center.uitextalignment
+      label.textAlignment = :left.uitextalignment
+
+      container = UIView.alloc.initWithFrame(CGRect.empty)
+      container.layer.cornerRadius = label.frame.height/2
+      container.backgroundColor = :black.uicolor(0.5)
+      container << label
 
       controls.reverse.each do |control|
+        control.container = container
         control.label = label
         @choose_view << control
       end
 
-      @choose_view << label
+      @choose_view << container
 
       Kiln.window << @choose_view
       @choose_view.fade_in
@@ -374,9 +381,10 @@ module Kiln
       f.origin.y *= 2
       f.size.width *= 2
       f.size.height *= 2
-      # f = f.left(Kiln.window.bounds.width)
 
-      btn = KilnChooseViewButton.alloc.initWithFrame(f)
+      btn = KilnChooseViewButton.alloc.initWithFrame(view.bounds)
+      btn.transform = view.transform
+      btn.frame = f
       btn.target = view
       btn.on(:touch_down_repeat) {
         did_choose_view(view)
@@ -490,7 +498,6 @@ module Kiln
       when UIInterfaceOrientationLandscapeRight
         teh_transform = CATransform3DRotate(teh_transform, 90.degrees, 0, 0, 1)
       end
-      @cover.layer.transform = teh_transform
       UIView.animate(duration: animate ? nil : 0) do
         @revert[:views].each do |subview|
           subview.layer.transform = teh_transform
@@ -608,6 +615,7 @@ module Kiln
   end
 
   class KilnChooseViewButton < UIButton
+    attr_accessor :container
     attr_accessor :label
     attr_accessor :target
     attr_accessor :children
@@ -615,7 +623,8 @@ module Kiln
     def initWithFrame(frame)
       super.tap do
         self.backgroundColor = :clear.uicolor
-        @timer = nil
+        @@fade_out_timer = nil
+        @@slide_out_timer = nil
 
         self.on(:touch_down) {
           start_touch
@@ -626,24 +635,49 @@ module Kiln
       end
     end
 
+    def slide_out_timer=(timer)
+      if @@slide_out_timer
+        @@slide_out_timer.invalidate
+      end
+      @@slide_out_timer = timer
+    end
+
+    def fade_out_timer=(timer)
+      if @@fade_out_timer
+        @@fade_out_timer.invalidate
+      end
+      @@fade_out_timer = timer
+    end
+
     def start_touch
+      if @@fade_out_timer
+        self.fade_out_timer = nil
+        @container.alpha = 1
+      else
+        @container.alpha = 0
+        @container.fade_in
+      end
+
       @label.text = target.inspect
-      @label.alpha = 0
-      @label.fade_in
+      @label.sizeToFit
+      @label.frame = @label.frame.width([Kiln.window.frame.width - 10, @label.frame.width].min)
+      @container.frame = @label.bounds.grow(5)
+      @container.center = @container.superview.center
 
       self.backgroundColor = :black.uicolor(0.5)
-      @timer = 1.second.later do
+      self.slide_out_timer = 1.second.later do
         stop_touch
         slide_out
+        @@slide_out_timer = nil
       end
     end
 
     def stop_touch
       self.backgroundColor = :clear.uicolor
-      @timer.invalidate if @timer
-      @timer = nil
-      1.later do
-        @label.fade_out
+      self.slide_out_timer = nil
+      self.fade_out_timer = 1.second.later do
+        @container.fade_out
+        @@fade_out_timer = nil
       end
     end
 
