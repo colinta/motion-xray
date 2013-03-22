@@ -16,8 +16,12 @@ module Kiln
         @accessibility = UIButton.alloc.initWithFrame(view.bounds
           .thinner(view.bounds.width / 2))
 
-        @big_image = UIImageView.alloc.initWithFrame(Kiln.window.bounds)
+        @big_image = UIButton.alloc.initWithFrame(Kiln.window.bounds)
         @big_image.backgroundColor = :black.uicolor
+        @big_image.on :touch {
+          @big_image.fade_out_and_remove
+        }
+
 
         @colorblind.on :touch {
           show_big_colorblind(@colorblind.imageForState(:normal.uicontrolstate))
@@ -112,13 +116,10 @@ module Kiln
     end
 
     def show_big_colorblind(image)
-      @big_image.image = image
+      @big_image.setImage(image, forState: :normal.uicontrolstate)
       @big_image.alpha = 0
       Kiln.window << @big_image
       @big_image.fade_in {
-        3.seconds.later do
-          @big_image.fade_out_and_remove
-        end
       }
     end
 
