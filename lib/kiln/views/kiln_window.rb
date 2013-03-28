@@ -1,6 +1,6 @@
 module Kiln
 
-  class Window < UIWindow
+  class KilnWindow < UIWindow
 
     def motionEnded(motion, withEvent:event)
       if event.type == UIEventSubtypeMotionShake
