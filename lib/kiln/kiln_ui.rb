@@ -294,7 +294,7 @@ module Kiln
         next_indent = ''
       end
 
-      return_views << {view: view, indent: indent}.to_object
+      return_views << {view: view, indent: indent, depth: depth}
 
       subviews.each_with_index { |subview, index|
         view_tree(subview, next_indent, depth + 1, index == subviews.length - 1, return_views)
@@ -562,10 +562,11 @@ module Kiln
       end
 
       view_info = @subviews[index_path.row]
-      view = view_info.view
+      view = view_info['view']
       cell.view = view
+      cell.depth = view_info['depth']
       text = ''
-      indent = view_info.indent
+      indent = view_info['indent']
       text << indent << view.to_s
       cell.textLabel.text = text
       cell.row = index_path.row
@@ -582,6 +583,7 @@ module Kiln
     attr_accessor :view
     attr_accessor :row
     attr :detail_button
+    attr_accessor :depth
 
     def initWithStyle(style, reuseIdentifier:identifier)
       super.tap do
@@ -594,8 +596,11 @@ module Kiln
         self.detail_button.on :touch {
           Kiln.ui.select(self.view) if self.view
         }
-
       end
+    end
+
+    def accessibilityLabel
+      "depth #{depth}, #{self.inspect}"
     end
 
   end
