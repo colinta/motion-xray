@@ -5,6 +5,7 @@ module Kiln
   class KilnToolbar < UIView
     attr_accessor :canvas
     attr_accessor :selected
+    attr_accessor :delegate
 
     def initWithFrame(frame)
       super.tap do
@@ -76,6 +77,10 @@ module Kiln
 
       plugin_view = @views[@index]
       self.canvas << plugin_view
+
+      if self.canvas.is_a?(UIScrollView)
+        self.canvas.setContentOffset([0, 0], animated: false)
+      end
     end
 
     def show
