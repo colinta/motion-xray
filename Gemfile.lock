@@ -9,7 +9,7 @@ PATH
 PATH
   remote: ../sugarcube
   specs:
-    sugarcube (0.19.2)
+    sugarcube (0.20.2)
 
 GEM
   remote: https://rubygems.org/

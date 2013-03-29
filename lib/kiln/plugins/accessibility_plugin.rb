@@ -71,7 +71,7 @@ module Kiln
     end
 
     def get_accessibility_image
-      views = Kiln.ui.collect_views.map {|view|
+      views = Kiln.ui.collect_visible_views.map {|view|
         # if the view "is accessible", draw a green square
         # otherwise a red one
         f = view.convertRect(view.bounds, toView:nil)

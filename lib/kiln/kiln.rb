@@ -1,7 +1,11 @@
 module Kiln
   module_function
   def ui
-    @kiln ||= UI.new
+    @kiln_ui ||= UI.new
+  end
+
+  def controller
+    @kiln_controller ||= KilnViewController.new
   end
 
   def toggle
