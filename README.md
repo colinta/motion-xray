@@ -5,6 +5,12 @@ Developer tools for iOS.  Runs on the device, no browser or computer needed.
 
 (think Firebug or Webkit Developer Tools)
 
+TL;DR
+-----
+
+1. `gem install kiln`
+2. Replace `UIWindow` with `Kiln::KilnWindow`
+
 The Problem
 -----------
 
@@ -49,11 +55,8 @@ The application shrinks down to a quarter size, and the development environment
 takes up the remaining space.  That is Kiln, an in-app debugging and development
 environment! :-D
 
-Installation
+Features
 ------------
-
-1. `gem install kiln`
-2. Replace `UIWindow` with `Kiln::KilnWindow`
 
 That's enough to have the `Kiln.toggle` command fired whenever you shake the
 device.  If you want to use some other mechanism that launches Kiln (a
