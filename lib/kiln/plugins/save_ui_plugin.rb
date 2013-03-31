@@ -1,6 +1,6 @@
 module Kiln
 
-  class PersistUIPlugin < Plugin
+  class SaveUIPlugin < Plugin
     name 'Save UI'
 
     def initialize(type=nil)
@@ -59,7 +59,7 @@ module Kiln
         register(:teacup, true.class) { |t| 'true' }
         register(:teacup, false.class) { |t| 'false' }
         # fall back
-        register(:teacup, Object) { |v| v.inspect }
+        register(:teacup, NSObject) { |v| v.inspect }
       end
 
     end
@@ -69,7 +69,7 @@ module Kiln
       @changes = {}
     end
 
-    def kiln_view_in(canvas)
+    def plugin_view(canvas)
       @log = UITextView.alloc.initWithFrame(canvas.bounds)
       @log.editable = false
       @log.font = :monospace.uifont
@@ -91,7 +91,7 @@ module Kiln
       end
     end
 
-    def kiln_edit(target)
+    def edit(target)
       super
       KilnNotificationTargetDidChange.remove_observer(self)
       KilnNotificationTargetDidChange.add_observer(self, :'save_changes:', @target)
@@ -107,7 +107,7 @@ module Kiln
       apply = {}
       @changes.each do |view, properties|
         properties.each do |property, value|
-          encoded = PersistUIPlugin.encode(:teacup, value)
+          encoded = SaveUIPlugin.encode(:teacup, value)
           if encoded
             apply[view] ||= []
             apply[view] << [property, encoded]

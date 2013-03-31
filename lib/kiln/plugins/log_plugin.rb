@@ -1,7 +1,7 @@
 module Kiln
 
   class LogPlugin < Plugin
-    LogChangedNotification = 'Kiln::LogPlugin::LogChangedNotification'
+    # LogChangedNotification = 'Kiln::LogPlugin::LogChangedNotification'
 
     class << self
       def log
@@ -20,15 +20,15 @@ module Kiln
           log_message = NSMutableAttributedString.alloc.initWithString("ERROR! #{message}\n", attributes: {
             NSForegroundColorAttributeName => 0xCB7172.uicolor,
           })
-        when :warning, :yellow
-          nslog = "\033[33m#{message}\033[0m"
-          log_message = NSMutableAttributedString.alloc.initWithString("#{message}\n", attributes: {
-            NSForegroundColorAttributeName => 0xDFAF8F.uicolor,
-          })
         when :log, :white
           nslog = "\033[37m#{message}\033[0m"
           log_message = NSMutableAttributedString.alloc.initWithString("#{message}\n", attributes: {
             NSForegroundColorAttributeName => 0xBCBEAB.uicolor,
+          })
+        when :warning, :yellow
+          nslog = "\033[33m#{message}\033[0m"
+          log_message = NSMutableAttributedString.alloc.initWithString("#{message}\n", attributes: {
+            NSForegroundColorAttributeName => 0xDFAF8F.uicolor,
           })
         when :notice, :magenta
           nslog = "\033[35m#{message}\033[0m"
@@ -60,14 +60,16 @@ module Kiln
 
         entry = {message:log_message, date:NSDate.new}
         log << entry
-        LogChangedNotification.post_notification(nil, entry)
+        # LogChangedNotification.post_notification(nil, entry)
+
+        return nil
       end
     end
 
     name 'Logs'
     ActionsWidth = 25
 
-    def kiln_view_in(canvas)
+    def plugin_view(canvas)
       @text_view = UITextView.alloc.initWithFrame(canvas.bounds).tap do |text_view|
         text_view.editable = false
         text_view.delegate = self
@@ -109,8 +111,10 @@ module Kiln
             mail_view_controller = MFMailComposeViewController.new
             mail_view_controller.mailComposeDelegate = self
             mail_view_controller.setSubject('From kiln.')
-            mail_view_controller.setMessageBody(LogPlugin.log.map{ |line| line[:message].string }.join("\n"), isHTML:false)
-            Kiln.cool_down
+            mail_view_controller.setMessageBody(
+              '<pre>' << LogPlugin.log.map{ |line|
+                line[:date].string_with_format('HH:mm:ss.SSS') << ' ' << line[:message].string
+              }.join("\n") << '</pre>', isHTML: true)
             SugarCube::Modal.present_modal mail_view_controller
           }
           actions_container << email_button
@@ -127,6 +131,11 @@ module Kiln
         view << @actions_container
         view.backgroundColor = 0x2b2b2b.uicolor
       end
+    end
+
+    def edit(target)
+      super
+      LogPlugin.add_log(:info, target.inspect)
     end
 
     def toggle_datetimes
@@ -180,12 +189,12 @@ module Kiln
     end
 
     def show
-      LogChangedNotification.add_observer(self, :'update_log:')
+      # LogChangedNotification.add_observer(self, :'update_log:')
       update_log
     end
 
     def hide
-      LogChangedNotification.remove_observer(self)
+      # LogChangedNotification.remove_observer(self)
     end
 
     def update_log(notification=nil)
@@ -207,7 +216,7 @@ module Kiln
 
     def append_entry(log, entry)
       if @showing_datetimes
-        date = entry[:date].string_with_format(:iso8601)
+        date = entry[:date].string_with_format('HH:mm:ss.SSS')
         log.appendAttributedString(NSMutableAttributedString.alloc.initWithString("#{date} ", attributes: {
           NSForegroundColorAttributeName => 0xBCBEAB.uicolor,
         }))
@@ -215,7 +224,7 @@ module Kiln
       log.appendAttributedString(entry[:message])
     end
 
-    def mailComposeController(controller, didFinishWithResult:result)
+    def mailComposeController(controller, didFinishWithResult:result, error:error)
       SugarCube::Modal.dismiss_modal {
         Kiln.fire_up
       }
@@ -227,8 +236,8 @@ module Kiln
     module_function
 
     Error = 1
-    Warning = 2
-    Log = 3
+    Log = 2
+    Warning = 3
     Notice = 4
     Info = 5
     Ok = 6
@@ -236,8 +245,8 @@ module Kiln
 
     Levels = {
       error: Error,
-      warning: Warning,
       log: Log,
+      warning: Warning,
       notice: Notice,
       info: Info,
       ok: Ok,
@@ -257,16 +266,12 @@ module Kiln
       LogPlugin.add_log(type, args)
     end
 
-    def log(*args)
-      _log(:log, args)
-    end
-
     def error(*args)
       _log(:error, args)
     end
 
-    def ok(*args)
-      _log(:ok, args)
+    def log(*args)
+      _log(:log, args)
     end
 
     def warning(*args)
@@ -276,16 +281,20 @@ module Kiln
       _log(:warning, args)
     end
 
-    def debug(*args)
-      _log(:debug, args)
-    end
-
     def notice(*args)
       _log(:notice, args)
     end
 
     def info(*args)
       _log(:info, args)
+    end
+
+    def ok(*args)
+      _log(:ok, args)
+    end
+
+    def debug(*args)
+      _log(:debug, args)
     end
   end
 

@@ -17,15 +17,15 @@ module Kiln
       @name || self.class.name
     end
 
-    def kiln_view_in(canvas)
-      raise "You must implement `#{self.class}#kiln_view_in`"
+    def plugin_view(canvas)
+      raise "You must implement `#{self.class}#plugin_view`"
     end
 
-    def get_kiln_view_in(canvas)
-      @view = kiln_view_in(canvas)
+    def get_plugin_view(canvas)
+      @view ||= plugin_view(canvas)
     end
 
-    def kiln_edit(target)
+    def edit(target)
       @target = target
     end
 

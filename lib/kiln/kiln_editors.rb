@@ -19,8 +19,8 @@ module Kiln
       false
     end
 
-    def get_edit_view(rect)
-      @edit_view ||= self.edit_view(rect)
+    def get_edit_view(container_width)
+      @edit_view ||= self.edit_view(container_width)
     end
 
     def did_change?
@@ -37,7 +37,6 @@ module Kiln
     end
 
     def get_value
-
       if target.respond_to?(property)
         return target.send(property)
       elsif target.respond_to?("#{property}?")
@@ -56,10 +55,6 @@ module Kiln
         target.send(setter, value)
       end
       KilnNotificationTargetDidChange.post_notification(@target, { 'property' => @property, 'value' => value, 'original' => @original })
-    end
-
-    def did_change?
-      ! CGRectEqualToRect(@original, @target.send(@property))
     end
 
   end

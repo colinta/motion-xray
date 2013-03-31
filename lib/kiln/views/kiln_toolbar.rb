@@ -79,6 +79,7 @@ module Kiln
       self.canvas << plugin_view
 
       if self.canvas.is_a?(UIScrollView)
+        self.canvas.contentSize = plugin_view.frame.size
         self.canvas.setContentOffset([0, 0], animated: false)
       end
     end
@@ -106,7 +107,7 @@ module Kiln
 
     def add(plugin)
       name = plugin.kiln_name
-      plugin_view = plugin.get_kiln_view_in(@canvas)
+      plugin_view = plugin.get_plugin_view(@canvas)
       @plugin_items << plugin
       super(name, plugin_view)
     end

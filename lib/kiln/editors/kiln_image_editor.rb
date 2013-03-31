@@ -2,7 +2,7 @@ module Kiln
 
   class ImageEditor < PropertyEditor
 
-    def edit_view(rect)
+    def edit_view(container_width)
       canvas_bounds = Kiln.ui.bottom_half.frame
       @editor_margin = 20
       @editor_modal = UIView.alloc.initWithFrame(Kiln.window.bounds).tap do |editor_modal|
@@ -29,7 +29,7 @@ module Kiln
       @editor_modal.frame = @editor_modal.frame.right(Kiln.app_bounds.width)
       @editor_modal.fade_out
 
-      return UIView.alloc.initWithFrame([[0, 0], [rect.width, 34]]).tap do |view|
+      return UIView.alloc.initWithFrame([[0, 0], [container_width, 34]]).tap do |view|
         image_size = CGSize.new(50, 24)
         @image_thumbnail = KilnColorSwatch.alloc.initWithFrame([[4, 4], image_size])
         @image_thumbnail.image = get_value
@@ -41,7 +41,7 @@ module Kiln
 
         label_x = image_size.width + 8
         label_view = UILabel.new
-        label_view.frame = [[label_x, 5], [rect.width - label_x, 18]]
+        label_view.frame = [[label_x, 5], [container_width - label_x, 18]]
         label_view.text = @property.to_s
         label_view.font = :small.uifont
         label_view.backgroundColor = :clear.uicolor

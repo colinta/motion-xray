@@ -18,3 +18,4 @@ nbproject
 *.pxm
 /vendor/Pods/
 /vendor/Pods
+.dat*

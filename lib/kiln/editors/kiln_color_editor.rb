@@ -3,7 +3,7 @@ module Kiln
   class ColorEditor < PropertyEditor
     ColorEditorMargin = 20
 
-    def edit_view(rect)
+    def edit_view(container_width)
       canvas_bounds = Kiln.ui.bottom_half.frame
       @color_editor_modal = UIView.alloc.initWithFrame(Kiln.window.bounds).tap do |color_editor_modal|
         close_editor_control = UIControl.alloc.initWithFrame(color_editor_modal.bounds)
@@ -59,7 +59,7 @@ module Kiln
       @color_editor_modal.frame = @color_editor_modal.frame.right(Kiln.app_bounds.width)
       @color_editor_modal.fade_out
 
-      return UIView.alloc.initWithFrame([[0, 0], [rect.width, 34]]).tap do |view|
+      return UIView.alloc.initWithFrame([[0, 0], [container_width, 34]]).tap do |view|
         color_size = CGSize.new(50, 24)
         @color_picker = KilnColorSwatch.alloc.initWithFrame([[4, 4], color_size])
         @color_picker.color = get_value
@@ -71,7 +71,7 @@ module Kiln
 
         label_x = color_size.width + 8
         @label_view = UILabel.new.tap do |lbl|
-          lbl.frame = [[label_x, 5], [rect.width - label_x, 18]]
+          lbl.frame = [[label_x, 5], [container_width - label_x, 18]]
           lbl.font = :small.uifont
           lbl.backgroundColor = :clear.uicolor
           lbl.numberOfLines = 1
