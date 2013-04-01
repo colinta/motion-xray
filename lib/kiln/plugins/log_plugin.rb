@@ -1,7 +1,7 @@
 module Kiln
 
   class LogPlugin < Plugin
-    # LogChangedNotification = 'Kiln::LogPlugin::LogChangedNotification'
+    LogChangedNotification = 'Kiln::LogPlugin::LogChangedNotification'
 
     class << self
       def log
@@ -60,7 +60,7 @@ module Kiln
 
         entry = {message:log_message, date:NSDate.new}
         log << entry
-        # LogChangedNotification.post_notification(nil, entry)
+        LogChangedNotification.post_notification(nil, entry)
 
         return nil
       end
@@ -189,12 +189,12 @@ module Kiln
     end
 
     def show
-      # LogChangedNotification.add_observer(self, :'update_log:')
+      LogChangedNotification.add_observer(self, :'update_log:')
       update_log
     end
 
     def hide
-      # LogChangedNotification.remove_observer(self)
+      LogChangedNotification.remove_observer(self)
     end
 
     def update_log(notification=nil)

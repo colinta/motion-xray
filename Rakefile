@@ -12,5 +12,7 @@ Motion::Project::App.setup do |app|
   app.pods do
     pod 'CocoaLumberjack'
   end
+
   app.resources_dirs << 'lib/resources'
+  app.detect_dependencies = false
 end
