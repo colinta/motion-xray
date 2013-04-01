@@ -22,6 +22,7 @@ module Kiln
 
   class UI
     attr :teh_ui
+    attr :tiny_view
     attr :assign_button
     attr :top_bar
     attr :bottom_bar
@@ -98,7 +99,7 @@ module Kiln
     def build_the_ui
       unless @teh_ui
         @teh_ui = UIView.alloc.initWithFrame(Kiln.window.bounds)
-        @kiln_controller = KilnViewController.new
+        @kiln_controller = Kiln.controller
 
         @tiny_view = UIView.alloc.initWithFrame([[0, 0], [half_screen_width, half_screen_height]])
         @teh_ui << @tiny_view
@@ -294,7 +295,7 @@ module Kiln
         next_indent = ''
       end
 
-      return_views << {view: view, indent: indent}.to_object
+      return_views << {view: view, indent: indent, depth: depth}
 
       subviews.each_with_index { |subview, index|
         view_tree(subview, next_indent, depth + 1, index == subviews.length - 1, return_views)
@@ -303,7 +304,7 @@ module Kiln
     end
 
     def choose_view
-      restore_shown_views = collect_views
+      restore_shown_views = collect_visible_views
 
       @choose_view = UIView.alloc.initWithFrame(Kiln.window.bounds)
       @choose_view.backgroundColor = :black.uicolor
@@ -357,16 +358,16 @@ module Kiln
       select(view)
     end
 
-    def collect_views(view=nil)
+    def collect_visible_views(view=nil)
       if view
         # join all the subviews
         view.kiln_subviews.reverse.map { |subview|
-          collect_views(subview)
+          collect_visible_views(subview)
         }.flatten + [view]
       else
         # start at the revert[:views] and collect all subviews
         @revert[:views].reverse.map { |subview|
-          collect_views(subview)
+          collect_visible_views(subview)
         }.flatten.select { |subview| !subview.hidden? }
       end
     end
@@ -393,11 +394,9 @@ module Kiln
       btn.children = children
 
       btn.setImage(view.uiimage, forState: :normal.uicontrolstate)
+      btn.accessibilityLabel = "choose #{view.accessibilityLabel}"
       btn.layer.borderColor = :white.uicolor.cgcolor
       btn.layer.borderWidth = 1
-      children.each do |subbtn|
-        btn << subbtn
-      end
       view.hide
 
       children + [btn]
@@ -408,7 +407,7 @@ module Kiln
 
       @selected = selected
       @top_bar.text = @selected.class.name
-      index = @table_source.subviews.index { |item| item.view == @selected }
+      index = @table_source.subviews.index { |item| item[:view] == @selected }
       index_path = [0, index].nsindexpath
       @table.selectRowAtIndexPath(index_path, animated:true, scrollPosition:UITableViewScrollPositionNone)
       @table.scrollToRowAtIndexPath(index_path, atScrollPosition: UITableViewScrollPositionNone, animated:true)
@@ -459,15 +458,17 @@ module Kiln
 
     def collapse_picker
       return unless @picker_is_expanded
-      UIView.animate {
-        @top_half.frame = [[half_screen_width, 0], [half_screen_width, half_screen_height]]
+      UIView.animation_chain {
+        @top_half.frame = [[half_screen_width, 0], [full_screen_width, half_screen_height]]
         @expand_button.transform = CGAffineTransformMakeRotation(180.degrees)
-      }
+      }.and_then {
+        @top_half.frame = [[half_screen_width, 0], [half_screen_width, half_screen_height]]
+      }.start
       @picker_is_expanded = false
     end
 
     def tableView(table_view, didSelectRowAtIndexPath:index_path)
-      table_selection = @table_source.subviews[index_path.row].view
+      table_selection = @table_source.subviews[index_path.row][:view]
       if @selected == table_selection
         edit(table_selection)
       else
@@ -562,10 +563,11 @@ module Kiln
       end
 
       view_info = @subviews[index_path.row]
-      view = view_info.view
+      view = view_info[:view]
       cell.view = view
+      cell.depth = view_info[:depth]
       text = ''
-      indent = view_info.indent
+      indent = view_info[:indent]
       text << indent << view.to_s
       cell.textLabel.text = text
       cell.row = index_path.row
@@ -582,6 +584,7 @@ module Kiln
     attr_accessor :view
     attr_accessor :row
     attr :detail_button
+    attr_accessor :depth
 
     def initWithStyle(style, reuseIdentifier:identifier)
       super.tap do
@@ -594,8 +597,11 @@ module Kiln
         self.detail_button.on :touch {
           Kiln.ui.select(self.view) if self.view
         }
-
       end
+    end
+
+    def accessibilityLabel
+      "depth #{depth}, #{self.inspect}"
     end
 
   end
@@ -686,12 +692,17 @@ module Kiln
     end
 
     def slide_out
-      self.children.each do |child|
-        child.slide_out
+      if target.superview == Kiln.ui.tiny_view
+        Kiln.ui.did_choose_view(Kiln.window)
+      else
+        self.children.each do |child|
+          child.slide_out
+        end
+        self.children = []
+        self.slide(:up, Kiln.window.bounds.width) {
+          self.removeFromSuperview
+        }
       end
-      self.slide(:up, Kiln.window.bounds.width) {
-        self.removeFromSuperview
-      }
     end
 
   end
