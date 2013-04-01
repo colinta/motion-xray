@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    kiln (1.0.2)
+    kiln (1.0.3)
       geomotion (>= 0.7.0)
       sugarcube (>= 0.20.1)
 
