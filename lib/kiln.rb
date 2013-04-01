@@ -2,8 +2,8 @@ unless defined?(Motion::Project::Config)
   raise "The kiln gem must be required within a RubyMotion project Rakefile."
 end
 
-require 'sugarcube-anonymous'
-
+require 'sugarcube'
+require 'geomotion'
 
 Motion::Project::App.setup do |app|
   # scans app.files until it finds app/ (the default)

@@ -4,10 +4,6 @@ module Kiln
     unless @kiln_ui
       @kiln_ui ||= UI.new
 
-      Symbol.css_colors[:kiln_dashboard_label_text] = :darkblue.uicolor
-      Symbol.css_colors[:kiln_dashboard_label_border] = :lightblue.uicolor
-      Symbol.css_colors[:kiln_dashboard_label_bg] = :ghostwhite.uicolor
-
       # register default plugins if this is the first time kiln_ui has been
       # accessed.  AKA "startup".  Default plugins get pushed to the front,
       # so they will appear in reverse order than they are here.
