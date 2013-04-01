@@ -22,7 +22,6 @@ module Kiln
           @big_image.fade_out_and_remove
         }
 
-
         @colorblind.on :touch {
           show_big_colorblind(@colorblind.imageForState(:normal.uicontrolstate))
         }
