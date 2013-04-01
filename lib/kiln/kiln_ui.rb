@@ -23,6 +23,7 @@ module Kiln
   class UI
     attr :teh_ui
     attr :tiny_view
+    attr :expand_button
     attr :assign_button
     attr :top_bar
     attr :bottom_bar
@@ -284,11 +285,11 @@ module Kiln
       if indent
         next_indent = indent.dup
         if is_last
-          indent += '`-- '
+          indent += "╘═ "
           next_indent += '    '
         else
-          indent += '+-- '
-          next_indent += '|   '
+          indent += "╞═ "
+          next_indent += "┃  "
         end
       else
         indent = ''
@@ -427,7 +428,7 @@ module Kiln
       @bottom_bar.text = target.to_s
 
       Kiln.plugins.each do |plugin|
-        plugin.kiln_edit(target)
+        plugin.edit(target)
       end
       @target = target
       SugarCube::Adjust::adjust(target)
@@ -588,7 +589,7 @@ module Kiln
 
     def initWithStyle(style, reuseIdentifier:identifier)
       super.tap do
-        textLabel.font = UIFont.systemFontOfSize(10)
+        textLabel.font = :monospace.uifont(10)
         textLabel.lineBreakMode = :clip.uilinebreakmode
         @detail_button = KilnDetailButton.alloc.init
         @detail_button.frame = [[143, -0.5], [17, 19]]
@@ -601,7 +602,7 @@ module Kiln
     end
 
     def accessibilityLabel
-      "depth #{depth}, #{self.inspect}"
+      "depth #{depth}, instance of #{view.class}" + (view.superview ? ", child of #{view.superview.class}" : '')
     end
 
   end

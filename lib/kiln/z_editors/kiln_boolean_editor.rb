@@ -2,8 +2,8 @@ module Kiln
 
   class BooleanEditor < PropertyEditor
 
-    def edit_view(rect)
-      return UIView.alloc.initWithFrame([[0, 0], [rect.width, 27]]).tap do |view|
+    def edit_view(container_width)
+      return UIView.alloc.initWithFrame([[0, 0], [container_width, 27]]).tap do |view|
         view << UILabel.alloc.initWithFrame([[0, 4.5], view.bounds.size]).tap do |lbl|
           lbl.backgroundColor = :clear.uicolor
           lbl.text = "#{@property}?"

@@ -2,7 +2,7 @@ module Kiln
 
   class TextEditor < PropertyEditor
 
-    def edit_view(rect)
+    def edit_view(container_width)
       canvas_bounds = CGRect.new([0, 0], [Kiln.ui.full_screen_width, Kiln.ui.half_screen_height])
       @text_editor_margin = 20
       @text_editor_modal = UIView.alloc.initWithFrame(Kiln.window.bounds).tap do |text_editor_modal|
@@ -28,9 +28,9 @@ module Kiln
       @text_editor_modal.frame = @text_editor_modal.frame.right(Kiln.app_bounds.width)
       @text_editor_modal.fade_out
 
-      return UIView.alloc.initWithFrame([[0, 0], [rect.width, 77]]).tap do |view|
+      return UIView.alloc.initWithFrame([[0, 0], [container_width, 77]]).tap do |view|
         label_view = UILabel.new
-        label_view.frame = [[4, 5], [rect.width - 8, 18]]
+        label_view.frame = [[4, 5], [container_width - 8, 18]]
         label_view.text = @property.to_s
         label_view.font = :small.uifont
         label_view.backgroundColor = :clear.uicolor
@@ -48,7 +48,7 @@ module Kiln
         end
         view << @open_text_button
 
-        @text_view = UITextView.alloc.initWithFrame([[4, 23], [rect.width, 54]]).tap do |text_view|
+        @text_view = UITextView.alloc.initWithFrame([[4, 23], [container_width, 54]]).tap do |text_view|
           text_view.backgroundColor = :white.uicolor
           text_view.editable = false
           text_view.font = :small.uifont

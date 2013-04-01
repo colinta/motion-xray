@@ -2,8 +2,8 @@ module Kiln
 
   class FrameEditor < PropertyEditor
 
-    def edit_view(rect)
-      return UIView.alloc.initWithFrame([[0, 0], [rect.width, 80]]).tap do |view|
+    def edit_view(container_width)
+      return UIView.alloc.initWithFrame([[0, 0], [container_width, 80]]).tap do |view|
         frame_view = UIView.alloc.initWithFrame([[4, 4], [92, 72]])
         frame_view.clipsToBounds = true
         frame_view.backgroundColor = :lightgray.uicolor
@@ -97,6 +97,10 @@ module Kiln
       set_value(frame)
 
       update_frame
+    end
+
+    def did_change?
+      ! CGRectEqualToRect(@original, @target.send(@property))
     end
 
   end

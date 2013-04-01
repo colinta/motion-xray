@@ -3,11 +3,8 @@ module Kiln
   class AccessibilityPlugin < Plugin
     name 'Accessibility'
 
-    def initialize
-    end
-
-    def kiln_view_in(canvas)
-      UIView.alloc.initWithFrame(canvas.bounds).tap do |view|
+    def plugin_view(canvas)
+      return UIView.alloc.initWithFrame(canvas.bounds).tap do |view|
         view.backgroundColor = :black.uicolor
 
         @colorblind = UIButton.alloc.initWithFrame(view.bounds
@@ -53,15 +50,19 @@ module Kiln
       @colorblind_spinner.startAnimating
       @accessibility_spinner.startAnimating
 
-      0.1.later do
+      Dispatch::Queue.concurrent(:default).async do
         image = get_colorblind_image
-        @colorblind.setImage(image, forState: :normal.uicontrolstate)
-        @colorblind_spinner.stopAnimating
+        Dispatch::Queue.main.async do
+          @colorblind.setImage(image, forState: :normal.uicontrolstate)
+          @colorblind_spinner.stopAnimating
+        end
       end
-      0.1.later do
+      Dispatch::Queue.concurrent(:default).async do
         image = get_accessibility_image
-        @accessibility.setImage(image, forState: :normal.uicontrolstate)
-        @accessibility_spinner.stopAnimating
+        Dispatch::Queue.main.async do
+          @accessibility.setImage(image, forState: :normal.uicontrolstate)
+          @accessibility_spinner.stopAnimating
+        end
       end
     end
 

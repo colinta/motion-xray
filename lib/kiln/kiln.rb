@@ -1,7 +1,19 @@
 module Kiln
   module_function
   def ui
-    @kiln_ui ||= UI.new
+    unless @kiln_ui
+      @kiln_ui ||= UI.new
+
+      # register default plugins if this is the first time kiln_ui has been
+      # accessed.  AKA "startup".  Default plugins get pushed to the front,
+      # so they will appear in reverse order than they are here.
+      [LogPlugin, AccessibilityPlugin, UIPlugin].each do |plugin_class|
+        unless Kiln.plugins.any? { |plugin| plugin_class === plugin }
+          Kiln.plugins.unshift(plugin_class.new)
+        end
+      end
+    end
+    return @kiln_ui
   end
 
   def controller

@@ -7,13 +7,13 @@ module Kiln
       @editor_instances = []
     end
 
-    def kiln_view_in(canvas)
+    def plugin_view(canvas)
       @editors = Kiln::KilnTypewriterView.alloc.initWithFrame(canvas.bounds)
       @editors.scroll_view = canvas
       @editors
     end
 
-    def kiln_edit(target)
+    def edit(target)
       super
       @editors.subviews.each &:removeFromSuperview
       @editor_instances = []
@@ -29,7 +29,7 @@ module Kiln
 
           editor_instance = editor_class.with_target(@target, property:property)
           @editor_instances << editor_instance
-          section_view.tracking_view << editor_instance.get_edit_view(@editors.bounds)
+          section_view.tracking_view << editor_instance.get_edit_view(@editors.bounds.size.width)
         end
         @editors << section_view.tracking_view
       end
