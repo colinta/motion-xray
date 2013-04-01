@@ -7,8 +7,6 @@ Bundler.require
 
 Motion::Project::App.setup do |app|
   # Use `rake config' to see complete project settings.
-  app.name = 'kiln'
-
-  app.resources_dirs << 'lib/resources'
+  app.name = 'motion-xray'
   app.detect_dependencies = false
 end

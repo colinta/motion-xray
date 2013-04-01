@@ -3,13 +3,13 @@ include SugarCube::Adjust
 
 class AppDelegate
   def application(application, didFinishLaunchingWithOptions:launchOptions)
-    @window = Kiln::KilnWindow.alloc.initWithFrame(UIScreen.mainScreen.bounds)
+    @window = Motion::Xray::XrayWindow.alloc.initWithFrame(UIScreen.mainScreen.bounds)
     ctlr = MyController.new
     first = UINavigationController.alloc.initWithRootViewController(ctlr)
     @window.rootViewController = first
     @window.makeKeyAndVisible
 
-    Kiln.register(Kiln::SaveUIPlugin.new)
+    Motion::Xray.register(Motion::Xray::SaveUIPlugin.new)
 
     true
   end
