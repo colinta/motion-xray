@@ -384,7 +384,10 @@ methods that you can call, or get called, on a plugin:
 
 - `plugin_view(canvas_view)` - the view returned by this method will be placed
   in `canvas_view` when your plugin is selected
-- `edit(target)` - called when a new view is double-tapped in the UI picker.
+
+#### Methods you *can* implement
+
+- `edit(target)` - called when a new view is chosen in the UI picker.
   You should call `super`, which assigns this view to the `target` property.
   Then you can update `self.view` with any changes that you need to apply.
 - `show` - called when your plugin is selected (this will always be after
