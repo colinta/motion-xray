@@ -103,23 +103,27 @@ module Motion ; module Xray
         button_y += ActionsWidth
 
         # send email button
-        if MFMailComposeViewController.canSendMail
-          email_button = UIButton.custom
-          email_button.setImage('xray_email_button'.uiimage, forState: :normal.uicontrolstate)
-          email_button.frame = [[@toggle_actions_button.frame.width, button_y], [ActionsWidth, ActionsWidth]]
-          email_button.on :touch {
-            mail_view_controller = MFMailComposeViewController.new
-            mail_view_controller.mailComposeDelegate = self
-            mail_view_controller.setSubject('From Motion-Xray.')
-            mail_view_controller.setMessageBody(
-              '<pre>' << LogPlugin.log.map{ |line|
-                line[:date].string_with_format('HH:mm:ss.SSS') << ' ' << line[:message].string
-              }.join("\n") << '</pre>', isHTML: true)
-            SugarCube::Modal.present_modal mail_view_controller
-          }
-          actions_container << email_button
-          button_y += ActionsWidth
-        end
+        email_button = UIButton.custom
+        email_button.setImage('xray_email_button'.uiimage, forState: :normal.uicontrolstate)
+        email_button.frame = [[@toggle_actions_button.frame.width, button_y], [ActionsWidth, ActionsWidth]]
+        email_button.on :touch {
+          if defined? MFMailComposeViewController
+            if MFMailComposeViewController.canSendMail
+              mail_view_controller = MFMailComposeViewController.new
+              mail_view_controller.mailComposeDelegate = self
+              mail_view_controller.setSubject('From Motion-Xray.')
+              mail_view_controller.setMessageBody(
+                '<pre>' << LogPlugin.log.map{ |line|
+                  line[:date].string_with_format('HH:mm:ss.SSS') << ' ' << line[:message].string
+                }.join("\n") << '</pre>', isHTML: true)
+              SugarCube::Modal.present_modal mail_view_controller
+            end
+          else
+            UIAlertView.alert "Email features require the MessageUI framework", "Add this to your Rakefile:\napp.frameworks << 'MessageUI'"
+          end
+        }
+        actions_container << email_button
+        button_y += ActionsWidth
       end
       @actions_container << @toggle_actions_button
 

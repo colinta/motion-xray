@@ -11,6 +11,9 @@ TL;DR
 1. `gem install motion-xray`
 2. Replace `UIWindow` with `Motion::Xray::XrayWindow`
 
+And if you want the email features, add `app.frameworks << 'MessageUI'` to your
+Rakefile.
+
 The Problem
 -----------
 
@@ -39,8 +42,8 @@ inspector, or to monitor the console log, preview how accessibile your app is
 information specifically useful to your app.  Below I'll show how to create a
 new plugin. Check out the [plugins folder][] for some examples.
 
-Features
------
+Overview
+--------
 
 If you clone and run Xray in the simulator, you will see a very boring app:
 
@@ -53,10 +56,10 @@ displays this:
 
 The application shrinks down to a quarter size, and the development environment
 takes up the remaining space.  That is Xray, an in-app debugging and development
-environment! :-D
+environment! :smiley:
 
 Features
-------------
+--------
 
 That's enough to have the `Motion::Xray.toggle` command fired whenever you shake
 the device.  If you want to use some other mechanism that launches Xray (a
