@@ -27,11 +27,11 @@ describe "Xray view extensions" do
 
   it "should have xray properties that are {section: {property: Editor}}" do
     first = @view_a.xray.first
-    String.should === first[0]
-    Hash.should === first[1]
+    first[0].should.is_a?(String)
+    first[1].should.is_a?(Hash)
     first_editor = first[1].first
-    Symbol.should === first_editor[0]
-    Hash.should === first_editor[1]
+    first_editor[0].should.is_a?(Symbol)
+    first_editor[1].should < Motion::Xray::Editor
   end
 
   it "should merge xray properties" do
