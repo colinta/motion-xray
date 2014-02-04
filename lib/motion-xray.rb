@@ -2,7 +2,8 @@ unless defined?(Motion::Project::Config)
   raise "The motion-xray gem must be required within a RubyMotion project Rakefile."
 end
 
-require 'sugarcube'
+require 'sugarcube-core'
+require 'sugarcube-image'
 require 'geomotion'
 
 Motion::Project::App.setup do |app|
