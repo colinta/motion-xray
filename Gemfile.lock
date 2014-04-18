@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    motion-xray (1.0.7)
+    motion-xray (1.0.8)
       geomotion (>= 0.10.0)
       sugarcube (>= 0.20.1)
 
