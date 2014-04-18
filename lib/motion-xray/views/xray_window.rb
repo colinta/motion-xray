@@ -3,8 +3,10 @@ module Motion ; module Xray
   class XrayWindow < UIWindow
 
     def motionEnded(motion, withEvent:event)
-      if event.type == UIEventSubtypeMotionShake
+      if RUBYMOTION_ENV == 'development' && event.type == UIEventSubtypeMotionShake
         Xray.toggle
+      else
+        super
       end
     end
 
