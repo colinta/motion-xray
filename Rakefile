@@ -10,4 +10,5 @@ Motion::Project::App.setup do |app|
   app.detect_dependencies = false
   app.frameworks << 'MessageUI'
   app.device_family = [:iphone, :ipad]
+  app.info_plist['UIViewControllerBasedStatusBarAppearance'] = false
 end
