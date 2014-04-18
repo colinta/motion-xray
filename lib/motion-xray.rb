@@ -14,6 +14,7 @@ require 'sugarcube-color'
 require 'sugarcube-events'
 require 'sugarcube-image'
 require 'sugarcube-animations'
+require 'sugarcube-timer'
 require 'geomotion'
 
 Motion::Project::App.setup do |app|
