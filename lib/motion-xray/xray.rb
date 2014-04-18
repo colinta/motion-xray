@@ -3,7 +3,7 @@ module Motion ; module Xray
   module_function
   def ui
     unless @xray_ui
-      @xray_ui ||= UI.new
+      @xray_ui = UI.new
 
       # register default plugins if this is the first time xray_ui has been
       # accessed.  AKA "startup".  Default plugins get pushed to the front,
