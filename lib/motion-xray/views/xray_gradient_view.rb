@@ -9,7 +9,7 @@ module Motion ; module Xray
       color_space = CGColorSpaceCreateDeviceRGB()
       cgcolors = [
         (start_color || :white).uicolor.CGColor,
-        (final_color || :lightgray).uicolor.CGColor,
+        (final_color || :light_gray).uicolor.CGColor,
       ]
 
       points = [0, 1]

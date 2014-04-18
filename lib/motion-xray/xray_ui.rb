@@ -128,11 +128,11 @@ module Motion ; module Xray
         @table.frame = [[0, bar_height], [half_screen_width, half_screen_height - bar_height * 2]]
         @table.rowHeight = 30
         @table.delegate = self
-        @table.autoresizingMask = :full.uiautoresizemask
+        @table.autoresizingMask = :fill.uiautoresizemask
         @top_half << @table
 
         @top_bar = XrayHeaderBackground.alloc.initWithFrame([[0, 0], [half_screen_width, bar_height]])
-        @top_bar.autoresizingMask = :fixed_top.uiautoresizemask
+        @top_bar.autoresizingMask = :fill_top.uiautoresizemask
         @top_bar.label = XrayHeaderLabel.alloc.initWithFrame(@top_bar.bounds.right(30).thinner(30))
         @top_bar.label.autoresizingMask = :flexible_width.uiautoresizemask
 
@@ -160,7 +160,7 @@ module Motion ; module Xray
         @bottom_bar = XrayHeaderBackground.alloc.initWithFrame([[0, half_screen_height - bar_height], [half_screen_width, bar_height]])
         @bottom_bar.label = XrayHeaderLabel.alloc.initWithFrame(@bottom_bar.bounds.right(3).thinner(33))
         @bottom_bar.label.autoresizingMask = :flexible_width.uiautoresizemask
-        @bottom_bar.autoresizingMask = :fixed_bottom.uiautoresizemask
+        @bottom_bar.autoresizingMask = :fill_bottom.uiautoresizemask
         @top_half << @bottom_bar
 
         @assign_button = XrayDetailButton.alloc.init
@@ -175,7 +175,7 @@ module Motion ; module Xray
         @bottom_half = UIView.alloc.initWithFrame([[0, bottom_half_top], [full_screen_width, bottom_half_height]])
         grad_layer = CAGradientLayer.layer
         grad_layer.frame = @bottom_half.layer.bounds
-        grad_layer.colors = [:white.uicolor.cgcolor, :lightgray.uicolor.cgcolor]
+        grad_layer.colors = [:white.uicolor.cgcolor, :light_gray.uicolor.cgcolor]
         @bottom_half.layer << grad_layer
         @teh_ui << @bottom_half
 
@@ -323,7 +323,7 @@ module Motion ; module Xray
       label = UILabel.alloc.initWithFrame([[5, 5], [0, 0]])
       label.backgroundColor = :clear.uicolor
       label.textColor = :white.uicolor
-      label.textAlignment = :left.uitextalignment
+      label.textAlignment = :left.nstextalignment
 
       container = UIView.alloc.initWithFrame(CGRect.empty)
       container.layer.cornerRadius = label.frame.height/2

@@ -21,7 +21,7 @@ class MyController < UIViewController
   def viewDidLoad
     self.view.backgroundColor = :black.uicolor
 
-    bluebox = UIView.alloc.initWithFrame([[20, 20], [30, 30]])
+    bluebox = UIView.alloc.initWithFrame([[20, 84], [30, 30]])
     bluebox.backgroundColor = :blue.uicolor
     self.view << bluebox
 

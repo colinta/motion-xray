@@ -6,7 +6,7 @@ module Motion ; module Xray
       return UIView.alloc.initWithFrame([[0, 0], [container_width, 80]]).tap do |view|
         frame_view = UIView.alloc.initWithFrame([[4, 4], [92, 72]])
         frame_view.clipsToBounds = true
-        frame_view.backgroundColor = :lightgray.uicolor
+        frame_view.backgroundColor = :light_gray.uicolor
         frame_view.layer.borderWidth = 1
         frame_view.layer.borderColor = :gray.uicolor.cgcolor
         frame_view.layer.cornerRadius = 5
@@ -16,7 +16,7 @@ module Motion ; module Xray
         label = UILabel.new
         label.frame = [[4, 0], [18, 72]]
         label.text = "X:\nY:\nW:\nH:"
-        label.textAlignment = :right.uitextalignment
+        label.textAlignment = :right.nstextalignment
         label.font = :small.uifont
         label.backgroundColor = :clear.uicolor
         label.numberOfLines = 4

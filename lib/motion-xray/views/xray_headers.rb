@@ -30,7 +30,7 @@ module Motion ; module Xray
     def initWithFrame(frame)
       super.tap do
         self.font = 'Futura'.uifont(12)
-        self.textAlignment = :left.uitextalignment
+        self.textAlignment = :left.nstextalignment
         self.textColor = :xray_dashboard_label_text.uicolor
         self.backgroundColor = :clear.uicolor
       end
@@ -65,7 +65,7 @@ module Motion ; module Xray
       else
         cgcolors = [
           :white.uicolor.CGColor,
-          :lightgray.uicolor.CGColor,
+          :light_gray.uicolor.CGColor,
         ]
       end
 
@@ -79,7 +79,7 @@ module Motion ; module Xray
       CGContextSaveGState(context)
       triangle_bounds = CGRect.new([0, 0], [20, 20]).shrink(6)
       :clear.uicolor.setStroke
-      :lightgray.uicolor.setFill
+      :light_gray.uicolor.setFill
 
       if false
         if @exposed
