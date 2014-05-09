@@ -2,6 +2,7 @@ class UIImage
   class << self
     alias :imageNamed_xray_old :imageNamed
     def imageNamed(name)
+      # this should log names and images, so we can refer to images by *name*
       imageNamed_xray_old(name)
     end
   end
@@ -121,5 +122,11 @@ end
 class UIButton
   def xray_subviews
     []
+  end
+end
+
+class UITableViewCell
+  def xray_subviews
+    contentView.subviews
   end
 end

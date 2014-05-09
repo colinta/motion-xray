@@ -9,9 +9,9 @@ module Motion
   module Xray
 
     module_function
-    def ui
-      unless @xray_ui
-        @xray_ui = UI.new
+    def layout
+      unless @xray_layout
+        @xray_layout = XrayLayout.new
 
         # register default plugins if this is the first time xray_ui has been
         # accessed.  AKA "startup".  Default plugins get pushed to the front,
@@ -22,7 +22,7 @@ module Motion
           end
         end
       end
-      return @xray_ui
+      return @xray_layout
     end
 
     def controller
@@ -30,19 +30,37 @@ module Motion
     end
 
     def toggle
-      Xray.ui.toggle
+      Xray.layout.toggle
     end
 
     def fire_up
-      Xray.ui.fire_up
+      Xray.layout.fire_up
     end
 
     def cool_down
-      Xray.ui.cool_down
+      Xray.layout.cool_down
     end
 
     def window
       UIApplication.sharedApplication.keyWindow || UIApplication.sharedApplication.windows[0]
+    end
+
+    def first_responder
+      _find_first_responder(Xray.window)
+    end
+
+    def _find_first_responder(view)
+      if view.firstResponder?
+        return view
+      end
+
+      found = nil
+      view.subviews.each do |subview|
+        found = _find_first_responder(subview)
+        break if found
+      end
+
+      return found
     end
 
     def app_shared
@@ -53,6 +71,15 @@ module Motion
       UIScreen.mainScreen.bounds
     end
 
+    def take_screenshot(view)
+      UIGraphicsBeginImageContextWithOptions(view.bounds.size, false, view.scale)
+      view.drawViewHierarchyInRect(view.bounds, afterScreenUpdates: true)
+      image = UIGraphicsGetImageFromCurrentImageContext()
+      UIGraphicsEndImageContext()
+
+      return image
+    end
+
     def plugins
       @plugins ||= []
     end
@@ -61,4 +88,12 @@ module Motion
       Xray.plugins << plugin
     end
 
+    def dashboard_label_text_color
+      @dashboard_label_text_color ||= UIColor.colorWithRed(0, green: 0, blue: 139 / 255.0)
+    end
+
 end end
+
+
+XrayTargetDidChangeNotification = 'Motion::Xray::TargetDidChangeNotification'
+

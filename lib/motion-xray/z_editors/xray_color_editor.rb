@@ -4,7 +4,7 @@ module Motion ; module Xray
     ColorEditorMargin = 20
 
     def edit_view(container_width)
-      canvas_bounds = Xray.ui.bottom_half.frame
+      canvas_bounds = Xray.layout.bottom_half.frame
       @color_editor_modal = UIView.alloc.initWithFrame(Xray.window.bounds).tap do |color_editor_modal|
         close_editor_control = UIControl.alloc.initWithFrame(color_editor_modal.bounds)
         close_editor_control.on :touch do

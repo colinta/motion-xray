@@ -33,8 +33,7 @@ DESC
 
   gem.require_paths = ['lib']
 
-  gem.add_dependency 'sugarcube', '>= 0.20.1'
-  gem.add_dependency 'geomotion', '>= 0.10.0'
+  gem.add_dependency 'motion-kit', '>= 0.9.0'
 
   gem.add_development_dependency 'rspec'
 end

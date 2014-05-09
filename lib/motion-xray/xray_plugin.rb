@@ -5,7 +5,7 @@ module Motion ; module Xray
     attr :view
     attr :target
 
-    def Plugin.name(value=nil)
+    def self.name(value=nil)
       if value
         @name = value
       else

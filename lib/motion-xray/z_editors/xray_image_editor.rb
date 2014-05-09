@@ -3,7 +3,7 @@ module Motion ; module Xray
   class ImageEditor < PropertyEditor
 
     def edit_view(container_width)
-      canvas_bounds = Xray.ui.bottom_half.frame
+      canvas_bounds = Xray.layout.bottom_half.frame
       @editor_margin = 20
       @editor_modal = UIView.alloc.initWithFrame(Xray.window.bounds).tap do |editor_modal|
         close_editor_control = UIControl.alloc.initWithFrame(editor_modal.bounds)

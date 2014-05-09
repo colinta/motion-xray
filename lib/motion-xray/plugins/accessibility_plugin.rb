@@ -67,11 +67,11 @@ module Motion ; module Xray
     end
 
     def get_colorblind_image
-      Xray.ui.get_screenshot.darken(brightness:-0.1, saturation:0)
+      Xray.get_screenshot(Xray.layout.view).darken(brightness:-0.1, saturation:0)
     end
 
     def get_accessibility_image
-      views = Xray.ui.collect_visible_views.map {|view|
+      views = Xray.layout.collect_visible_views.map {|view|
         # if the view "is accessible", draw a green square
         # otherwise a red one
         f = view.convertRect(view.bounds, toView:nil)

@@ -3,7 +3,7 @@ module Motion ; module Xray
   class TextEditor < PropertyEditor
 
     def edit_view(container_width)
-      canvas_bounds = CGRect.new([0, 0], [Xray.ui.full_screen_width, Xray.ui.half_screen_height])
+      canvas_bounds = CGRect.new([0, 0], [Xray.layout.full_screen_width, Xray.layout.half_screen_height])
       @text_editor_margin = 20
       @text_editor_modal = UIView.alloc.initWithFrame(Xray.window.bounds).tap do |text_editor_modal|
         text_editor_modal.backgroundColor = :black.uicolor(0.5)
