@@ -3,26 +3,18 @@ PATH
   specs:
     motion-xray (1.0.8)
       motion-kit (>= 0.9.0)
+      sugarcube (>= 1.6.0)
 
 GEM
   remote: https://rubygems.org/
   specs:
     dbt (1.1.4)
-    diff-lcs (1.1.3)
     motion-kit (0.9.4)
       dbt
-    rspec (2.12.0)
-      rspec-core (~> 2.12.0)
-      rspec-expectations (~> 2.12.0)
-      rspec-mocks (~> 2.12.0)
-    rspec-core (2.12.2)
-    rspec-expectations (2.12.1)
-      diff-lcs (~> 1.1.3)
-    rspec-mocks (2.12.2)
+    sugarcube (1.6.0)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
   motion-xray!
-  rspec

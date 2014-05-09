@@ -28,12 +28,12 @@ DESC
 
   gem.homepage    = 'https://github.com/colinta/motion-xray'
 
-  gem.files        = `git ls-files`.split($\)
-  gem.test_files   = gem.files.grep(%r{^spec/})
+  gem.files       = Dir.glob('lib/**/*.rb')
+  gem.files      << 'README.md'
+  gem.test_files  = Dir.glob('spec/**/*.rb')
 
   gem.require_paths = ['lib']
 
   gem.add_dependency 'motion-kit', '>= 0.9.0'
-
-  gem.add_development_dependency 'rspec'
+  gem.add_dependency 'sugarcube', '>= 1.6.0'
 end
