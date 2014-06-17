@@ -1,10 +1,11 @@
-module Motion ; module Xray
+# @requires Motion::Xray
+module Motion::Xray
 
   class XrayWindow < UIWindow
 
     def motionEnded(motion, withEvent:event)
       if RUBYMOTION_ENV == 'development' && event.type == UIEventSubtypeMotionShake
-        Xray.toggle
+        Motion::Xray.toggle
       else
         super
       end
@@ -12,4 +13,4 @@ module Motion ; module Xray
 
   end
 
-end end
+end

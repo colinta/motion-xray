@@ -1,11 +1,12 @@
-module Motion ; module Xray
+# @requires Motion::Xray
+module Motion::Xray
 
   class ColorEditor < PropertyEditor
     ColorEditorMargin = 20
 
     def edit_view(container_width)
-      canvas_bounds = Xray.layout.bottom_half.frame
-      @color_editor_modal = UIView.alloc.initWithFrame(Xray.window.bounds).tap do |color_editor_modal|
+      canvas_bounds = Motion::Xray.layout.bottom_half.frame
+      @color_editor_modal = UIView.alloc.initWithFrame(Motion::Xray.window.bounds).tap do |color_editor_modal|
         close_editor_control = UIControl.alloc.initWithFrame(color_editor_modal.bounds)
         close_editor_control.on :touch do
           # touching outside
@@ -56,7 +57,7 @@ module Motion ; module Xray
         toolbar.add('RGB', @color_sliders)
         toolbar.add('Named', @color_names)
       end
-      @color_editor_modal.frame = @color_editor_modal.frame.right(Xray.app_bounds.width)
+      @color_editor_modal.frame = @color_editor_modal.frame.right(Motion::Xray.app_bounds.width)
       @color_editor_modal.fade_out
 
       return UIView.alloc.initWithFrame([[0, 0], [container_width, 34]]).tap do |view|
@@ -84,7 +85,7 @@ module Motion ; module Xray
     def open_color_editor
       @color_picker.userInteractionEnabled = false
       # move it off screen before sliding it in
-      Xray.window << @color_editor_modal
+      Motion::Xray.window << @color_editor_modal
       @color_sliders.color = get_value || :clear.uicolor
       @color_editor_modal.fade_in
       @color_editor_modal.slide(:left) {
@@ -98,7 +99,7 @@ module Motion ; module Xray
       @color_editor_modal.slide(:left) {
         @color_editor_modal.removeFromSuperview
         # move it off screen, ready to move back in
-        @color_editor_modal.frame = @color_editor_modal.frame.x(Xray.app_bounds.width)
+        @color_editor_modal.frame = @color_editor_modal.frame.x(Motion::Xray.app_bounds.width)
         @color_picker.userInteractionEnabled = true
       }
     end
@@ -116,4 +117,4 @@ module Motion ; module Xray
 
   end
 
-end end
+end

@@ -1,4 +1,5 @@
-module Motion ; module Xray
+# @requires Motion::Xray
+module Motion::Xray
 
   class UIPlugin < Plugin
     name 'UI'
@@ -21,7 +22,7 @@ module Motion ; module Xray
       properties = @target.xray
       sections = properties.keys
       properties.each do |section, editors|
-        section_view = XraySectionHeader.alloc.initWithFrame([[0, 0], [Xray.layout.full_screen_width, 20]])
+        section_view = XraySectionHeader.alloc.initWithFrame([[0, 0], [Motion::Xray.layout.full_screen_width, 20]])
         section_view.text = section
         @editors << section_view
         editors.each do |property, editor_class|
@@ -38,4 +39,4 @@ module Motion ; module Xray
 
   end
 
-end end
+end

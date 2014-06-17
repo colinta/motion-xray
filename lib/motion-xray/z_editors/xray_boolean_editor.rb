@@ -1,4 +1,5 @@
-module Motion ; module Xray
+# @requires Motion::Xray
+module Motion::Xray
 
   class BooleanEditor < PropertyEditor
 
@@ -21,4 +22,4 @@ module Motion ; module Xray
 
   end
 
-end end
+end

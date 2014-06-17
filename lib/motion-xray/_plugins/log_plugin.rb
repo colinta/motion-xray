@@ -1,4 +1,5 @@
-module Motion ; module Xray
+# @requires Motion::Xray
+module Motion::Xray
 
   class LogPlugin < Plugin
     LogChangedNotification = 'Motion::Xray::LogPlugin::LogChangedNotification'
@@ -229,9 +230,9 @@ module Motion ; module Xray
     end
 
     def mailComposeController(controller, didFinishWithResult:result, error:error)
-      SugarCube::Modal.dismiss_modal {
-        Xray.fire_up
-      }
+      SugarCube::Modal.dismiss_modal do
+        Motion::Xray.fire_up
+      end
     end
 
   end
@@ -302,4 +303,4 @@ module Motion ; module Xray
     end
   end
 
-end end
+end

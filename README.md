@@ -125,7 +125,7 @@ It is very easy to create new plugins, I'll go over that below.  After you
 create a new plugin, you register it with Xray:
 
 ```ruby
-Xray.register(YourPlugin.new)
+Motion::Xray.register(YourPlugin.new)
 ```
 
 Built-in plugins
@@ -336,9 +336,6 @@ So far we have:
 - named our plugin 'Accessibility'
 - returned an empty container
 
-Let's add our two image views.  We'll make use of geomotion, which is required
-by Xray:
-
 ```ruby
 def plugin_view(canvas)
   return UIView.alloc.initWithFrame(canvas.bounds).tap do |view|
@@ -422,9 +419,9 @@ end
 Dependencies
 ------------
 
-Xray depends on geomotion, which I don't feel bad about, and SugarCube.  I would
-consider removing the SugarCube dependency, because not everyone uses it, but
-SugarCube adds a ton of benefit (like `#to_s` and `UIColor` additions).
+Xray depends on SugarCube.  I would consider removing the SugarCube dependency,
+because not everyone uses it, but SugarCube adds a ton of benefit (like `#to_s`
+and `UIColor` additions).
 
 [plugins folder]: https://github.com/colinta/motion-xray/tree/master
 [awesome-print]: https://github.com/michaeldv/awesome_print_motion

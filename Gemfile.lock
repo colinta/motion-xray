@@ -1,20 +1,41 @@
 PATH
-  remote: .
+  remote: ../motion-kit
   specs:
-    motion-xray (1.0.8)
-      motion-kit (>= 0.9.0)
-      sugarcube (>= 1.6.0)
+    motion-kit (0.10.7)
+      dbt (~> 1.1.5)
+
+PATH
+  remote: ../motion-kit-events
+  specs:
+    motion-kit-events (0.2.1)
+      dbt
+      motion-kit
+
+PATH
+  remote: ../sugarcube
+  specs:
+    sugarcube (2.0.0)
+
+PATH
+  remote: ../sweet-kit
+  specs:
+    sweet-kit (0.3.0)
+      motion-kit
+      sugarcube
 
 GEM
   remote: https://rubygems.org/
   specs:
-    dbt (1.1.4)
-    motion-kit (0.9.4)
-      dbt
-    sugarcube (1.6.0)
+    awesome_print_motion (0.1.0)
+    dbt (1.1.5)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
-  motion-xray!
+  awesome_print_motion
+  dbt
+  motion-kit!
+  motion-kit-events!
+  sugarcube!
+  sweet-kit!

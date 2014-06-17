@@ -1,11 +1,12 @@
-module Motion ; module Xray
+# @requires Motion::Xray
+module Motion::Xray
 
   class ImageEditor < PropertyEditor
 
     def edit_view(container_width)
-      canvas_bounds = Xray.layout.bottom_half.frame
+      canvas_bounds = Motion::Xray.layout.bottom_half.frame
       @editor_margin = 20
-      @editor_modal = UIView.alloc.initWithFrame(Xray.window.bounds).tap do |editor_modal|
+      @editor_modal = UIView.alloc.initWithFrame(Motion::Xray.window.bounds).tap do |editor_modal|
         close_editor_control = UIControl.alloc.initWithFrame(editor_modal.bounds)
         close_editor_control.on :touch do
           # touching outside
@@ -26,7 +27,7 @@ module Motion ; module Xray
           }
         end
       end
-      @editor_modal.frame = @editor_modal.frame.right(Xray.app_bounds.width)
+      @editor_modal.frame = @editor_modal.frame.right(Motion::Xray.app_bounds.width)
       @editor_modal.fade_out
 
       return UIView.alloc.initWithFrame([[0, 0], [container_width, 34]]).tap do |view|
@@ -53,7 +54,7 @@ module Motion ; module Xray
     def open_editor
       @image_thumbnail.userInteractionEnabled = false
       # move it off screen before sliding it in
-      Xray.window << @editor_modal
+      Motion::Xray.window << @editor_modal
       @image_picker.image = get_value
       @editor_modal.fade_in
       @editor_modal.slide(:left) {
@@ -67,7 +68,7 @@ module Motion ; module Xray
       @editor_modal.slide(:left) {
         @editor_modal.removeFromSuperview
         # move it off screen, ready to move back in
-        @editor_modal.frame = @editor_modal.frame.x(Xray.app_bounds.width)
+        @editor_modal.frame = @editor_modal.frame.x(Motion::Xray.app_bounds.width)
         @image_thumbnail.userInteractionEnabled = true
       }
     end
@@ -75,4 +76,4 @@ module Motion ; module Xray
 
   end
 
-end end
+end

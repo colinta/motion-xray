@@ -1,99 +1,120 @@
-module Motion ; module Xray
-
-  class XrayViewController < UIViewController
-
-    def loadView
-      @layout = Xray.layout
-      self.view = @layout.view
-    end
-
-    def willAnimateRotationToInterfaceOrientation(orientation, duration:duration)
-      @layout.reapply!
-    end
-
-  end
+# @requires Motion::Xray
+module Motion::Xray
 
   class XrayLayout < MK::Layout
 
-    def initialize
-      super()
-    end
+    view :background_container
+    view :status_bar
+    view :plugins_bar_bg
 
-    def toggle
-      if fired?
-        cool_down
-      else
-        fire_up
-      end
-
-      return fired?
-    end
-
-    def fired?
-      @fired
+    def initialize(options={})
+      options[:root] = Motion::Xray.private_window
+      super(options)
     end
 
     def fire_up
-      return if @fired
-      @fired = true
+      self.view.hidden = false
+      self.view.makeKeyAndVisible
+      @status_bar_style_was = Motion::Xray.app.statusBarStyle
+      Motion::Xray.app.setStatusBarStyle(UIStatusBarStyleLightContent, animated: true)
 
-      Xray.first_responder && Xray.first_responder.resignFirstResponder
+      self.status_bar.y = 0
+      self.status_bar.slide_from :top
+      self.status_bar_activates
+      self.plugins_bar_bg.hidden = true
+    end
 
-      # gather all window subviews into 'revert_view'
-      @revert = {
-        views: [],
-        status_bar_was_hidden?: Xray.app_shared.statusBarHidden?,
-        transforms: {}
-      }
+    def activate
+      self.status_bar_deactivates
 
-      Xray.window.subviews.each do |subview|
-        @revert[:views] << subview
-        @revert[:transforms][subview] = subview.layer.transform
+      self.view.height = UIScreen.mainScreen.bounds.size.height
+
+      self.plugins_bar_bg.y = self.view.height - self.plugins_bar_bg.height
+      self.plugins_bar_bg.slide_from :bottom
+      self.plugins_bar_bg.hidden = false
+
+      actual_height = self.view.height
+      actual_width = self.view.width
+      margin = 20
+      desired_width = actual_width - margin * 2
+      desired_height = actual_height - self.status_bar.height - self.plugins_bar_bg.height - margin * 2
+      height_scale = desired_height / actual_height
+      width_scale = desired_width / actual_width
+      if height_scale < width_scale
+        scale = height_scale
+      else
+        scale = width_scale
       end
-      @old_controller = Xray.window.rootViewController
-      @revert[:views].each do |view|
-        # @tiny_view << view
-      end
-      Xray.app_shared.setStatusBarHidden(true, withAnimation:UIStatusBarAnimationSlide)
-      Xray.window.rootViewController = @xray_controller
+
+      Motion::Xray.window.scale_to(scale)
+      offset = (desired_height - Motion::Xray.window.height) / 2
+      Motion::Xray.window.delta_to([0, offset])
+    end
+
+    def deactivate
+      self.status_bar_activates
+      self.plugins_bar_bg.slide :down
+
+      self.view.height = 40
+      Motion::Xray.window.scale_to(1)
+      Motion::Xray.window.move_to([0, 0])
     end
 
     def cool_down
-      return unless @fired
-      @fired = false
-
-      @revert[:views].each do |subview|
-        Xray.window << subview
-        UIView.animate {
-          # identity matrix
-          subview.layer.transform = @revert[:transforms][subview]
-          subview.layer.anchorPoint = [0.5, 0.5]
-        }
+      Motion::Xray.app.setStatusBarStyle(@status_bar_style_was, animated: true)
+      self.status_bar.slide :up do
+        Motion::Xray.shutdown
       end
-      Xray.app_shared.setStatusBarHidden(@revert[:status_bar_was_hidden?], withAnimation:UIStatusBarAnimationSlide)
-      @revert = nil
+    end
+
+    def shutdown
+      self.view.hidden = true
+    end
+
+    def status_bar_activates
+      Motion::Xray.status_action('Touch to open Motion::Xray', true) do
+        trigger :activate
+      end
+    end
+
+    def status_bar_deactivates
+      Motion::Xray.status_action('Touch to close Motion::Xray', true) do
+        trigger :deactivate
+      end
     end
 
     def layout
-      root(UIView) do
-        frame Xray.window.bounds
+      frame Motion::Xray.window.bounds
+      autoresizing_mask :fill
+
+      add StatusBarButton, :status_bar
+      add UIView, :plugins_bar_bg do
+        add PluginsBar, :plugins_bar
+      end
+
+      self.status_bar.off :touch
+      self.status_bar.on :touch do
+        Motion::Xray.status_action && Motion::Xray.status_action.call
       end
     end
 
-    def collect_visible_views(view=nil)
-      if view
-        # join all the subviews
-        view.xray_subviews.reverse.map { |subview|
-          collect_visible_views(subview)
-        }.flatten + [view]
-      else
-        # start at the revert[:views] and collect all subviews
-        @revert[:views].reverse.map { |subview|
-          collect_visible_views(subview)
-        }.flatten.select { |subview| !subview.hidden? }
+    def status_bar_style
+      frame from_top(width: '100%', height: 40)
+    end
+
+    def plugins_bar_style
+      frame width: '100%', height: PluginsBar::HEIGHT
+    end
+
+    def plugins_bar_bg_style
+      frame from_bottom(width: '100%', height: PluginsBar::HEIGHT)
+      gradient do
+        startPoint [0, 1]
+        endPoint [0, 0]
+        colors ['#353535'.uicolor, '#494949'.uicolor]
       end
     end
 
   end
 
-end end
+end

@@ -1,4 +1,5 @@
-module Motion ; module Xray
+# @requires Motion::Xray
+module Motion::Xray
 
   class SaveUIPlugin < Plugin
     name 'Save UI'
@@ -139,4 +140,4 @@ module Motion ; module Xray
 
   end
 
-end end
+end

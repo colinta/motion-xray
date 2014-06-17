@@ -34,6 +34,8 @@ DESC
 
   gem.require_paths = ['lib']
 
-  gem.add_dependency 'motion-kit', '>= 0.9.0'
-  gem.add_dependency 'sugarcube', '>= 1.6.0'
+  gem.add_dependency 'dbt'
+  gem.add_dependency 'sweet-kit'
+  gem.add_dependency 'motion-kit-events'
+  gem.add_development_dependency 'awesome_print_motion'
 end

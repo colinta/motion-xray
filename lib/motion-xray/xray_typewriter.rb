@@ -1,4 +1,5 @@
-module Motion ; module Xray
+# @requires Motion::Xray
+module Motion::Xray
   # Copied from the gem of the same name, but I didn't want the dependency
   class XrayTypewriterView < UIView
     attr_accessor :scroll_view
@@ -214,4 +215,4 @@ module Motion ; module Xray
 
   end
 
-end end
+end

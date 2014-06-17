@@ -1,11 +1,12 @@
-module Motion ; module Xray
+# @requires Motion::Xray
+module Motion::Xray
 
   class TextEditor < PropertyEditor
 
     def edit_view(container_width)
-      canvas_bounds = CGRect.new([0, 0], [Xray.layout.full_screen_width, Xray.layout.half_screen_height])
+      canvas_bounds = CGRect.new([0, 0], [Motion::Xray.layout.full_screen_width, Motion::Xray.layout.half_screen_height])
       @text_editor_margin = 20
-      @text_editor_modal = UIView.alloc.initWithFrame(Xray.window.bounds).tap do |text_editor_modal|
+      @text_editor_modal = UIView.alloc.initWithFrame(Motion::Xray.window.bounds).tap do |text_editor_modal|
         text_editor_modal.backgroundColor = :black.uicolor(0.5)
 
         close_editor_control = UIControl.alloc.initWithFrame(text_editor_modal.bounds)
@@ -25,7 +26,7 @@ module Motion ; module Xray
           background << @text_editor
         end
       end
-      @text_editor_modal.frame = @text_editor_modal.frame.right(Xray.app_bounds.width)
+      @text_editor_modal.frame = @text_editor_modal.frame.right(Motion::Xray.app_bounds.width)
       @text_editor_modal.fade_out
 
       return UIView.alloc.initWithFrame([[0, 0], [container_width, 77]]).tap do |view|
@@ -68,7 +69,7 @@ module Motion ; module Xray
     def open_text_editor
       # move it off screen before sliding it in
       @text_editor.text = get_value
-      Xray.window << @text_editor_modal
+      Motion::Xray.window << @text_editor_modal
       @text_editor.becomeFirstResponder
       @text_editor_modal.fade_in
       @text_editor_modal.slide(:left) {
@@ -82,7 +83,7 @@ module Motion ; module Xray
       @text_editor_modal.slide(:left) {
         @text_editor_modal.removeFromSuperview
         # move it off screen, ready to move back in
-        @text_editor_modal.frame = @text_editor_modal.frame.x(Xray.app_bounds.width)
+        @text_editor_modal.frame = @text_editor_modal.frame.x(Motion::Xray.app_bounds.width)
         @open_text_button.userInteractionEnabled = true
         set_value(@text_editor.text)
         update_text
@@ -91,4 +92,4 @@ module Motion ; module Xray
 
   end
 
-end end
+end

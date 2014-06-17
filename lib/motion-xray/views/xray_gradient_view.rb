@@ -1,4 +1,5 @@
-module Motion ; module Xray
+# @requires Motion::Xray
+module Motion::Xray
 
   class XrayGradientView < UIView
     attr_accessor :start_color
@@ -20,4 +21,4 @@ module Motion ; module Xray
 
   end
 
-end end
+end

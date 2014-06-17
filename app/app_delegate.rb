@@ -6,8 +6,6 @@ class AppDelegate
     @window.rootViewController = first
     @window.makeKeyAndVisible
 
-    Motion::Xray.register(Motion::Xray::SaveUIPlugin.new)
-
     true
   end
 end
@@ -15,27 +13,59 @@ end
 
 class MyController < UIViewController
 
-  def viewDidLoad
-    self.view.backgroundColor = :black.uicolor
+  def loadView
+    @layout = MyLayout.new
+    self.view = @layout.view
+  end
 
-    bluebox = UIView.alloc.initWithFrame([[20, 84], [30, 30]])
-    bluebox.backgroundColor = :blue.uicolor
-    self.view << bluebox
+end
 
-    darkbox = UIView.alloc.initWithFrame(bluebox.frame.below(8))
-    darkbox.backgroundColor = '#222222'.uicolor
-    self.view << darkbox
 
-    lightbox = UIView.alloc.initWithFrame(darkbox.frame.below(8))
-    lightbox.backgroundColor = :white.uicolor
-    self.view << lightbox
+class MyLayout < MK::Layout
 
-    label = UILabel.alloc.initWithFrame(lightbox.frame.below(8))
-    label.backgroundColor = :clear.uicolor
-    label.textColor = :white.uicolor
-    label.text = 'A Label'
-    label.sizeToFit
-    self.view << label
+  def layout
+    backgroundColor :black
+
+    add UIControl, :bluebox do
+      frame [[20, 84], [30, 30]]
+      backgroundColor :blue
+      on :touch_start do
+        self.get(:bluebox).backgroundColor = :darkblue.uicolor
+      end
+      on :touch_stop do
+        self.get(:bluebox).backgroundColor = :blue.uicolor
+      end
+    end
+
+    add UIControl, :darkbox do
+      frame below(:bluebox, down: 8, size: [30, 30])
+      backgroundColor '#222'
+      on :touch_start do
+        self.get(:darkbox).backgroundColor = '#000'.uicolor
+      end
+      on :touch_stop do
+        self.get(:darkbox).backgroundColor = '#222'.uicolor
+      end
+    end
+
+    add UIControl, :lightbox do
+      frame below(:darkbox, down: 8, size: [30, 30])
+      backgroundColor :white
+      on :touch_start do
+        self.get(:lightbox).backgroundColor = :light_gray.uicolor
+      end
+      on :touch_stop do
+        self.get(:lightbox).backgroundColor = :white.uicolor
+      end
+    end
+
+    add UILabel, :label do
+      frame below(:lightbox, down: 8)
+      backgroundColor :clear
+      textColor :white
+      text 'A Label'
+      sizeToFit
+    end
   end
 
 end

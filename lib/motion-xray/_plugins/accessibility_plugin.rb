@@ -1,4 +1,5 @@
-module Motion ; module Xray
+# @requires Motion::Xray
+module Motion::Xray
 
   class AccessibilityPlugin < Plugin
     name 'Accessibility'
@@ -13,7 +14,7 @@ module Motion ; module Xray
         @accessibility = UIButton.alloc.initWithFrame(view.bounds
           .thinner(view.bounds.width / 2))
 
-        @big_image = UIButton.alloc.initWithFrame(Xray.window.bounds)
+        @big_image = UIButton.alloc.initWithFrame(Motion::Xray.window.bounds)
         @big_image.backgroundColor = :black.uicolor
         @big_image.on :touch {
           @big_image.fade_out_and_remove
@@ -67,11 +68,21 @@ module Motion ; module Xray
     end
 
     def get_colorblind_image
-      Xray.get_screenshot(Xray.layout.view).darken(brightness:-0.1, saturation:0)
+      Motion::Xray.get_screenshot(Motion::Xray.layout.view).darken(brightness:-0.1, saturation:0)
+    end
+
+    def collect_visible_views(view=nil)
+      return [] unless @active
+      view ||= Motion::Xray.window
+
+      # join all the subviews
+      view.xray_subviews.reverse.map do |subview|
+        collect_visible_views(subview)
+      end.flatten + [view]
     end
 
     def get_accessibility_image
-      views = Xray.layout.collect_visible_views.map {|view|
+      views = collect_visible_views.map {|view|
         # if the view "is accessible", draw a green square
         # otherwise a red one
         f = view.convertRect(view.bounds, toView:nil)
@@ -90,7 +101,7 @@ module Motion ; module Xray
       }
 
       scale = UIScreen.mainScreen.scale
-      UIGraphicsBeginImageContextWithOptions(Xray.window.bounds.size, false, scale)
+      UIGraphicsBeginImageContextWithOptions(Motion::Xray.window.bounds.size, false, scale)
       context = UIGraphicsGetCurrentContext()
 
       views.reverse.each do |subview|
@@ -119,11 +130,11 @@ module Motion ; module Xray
     def show_big_colorblind(image)
       @big_image.setImage(image, forState: :normal.uicontrolstate)
       @big_image.alpha = 0
-      Xray.window << @big_image
+      Motion::Xray.window << @big_image
       @big_image.fade_in {
       }
     end
 
   end
 
-end end
+end

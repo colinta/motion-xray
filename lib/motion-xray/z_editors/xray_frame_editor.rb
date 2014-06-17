@@ -1,4 +1,5 @@
-module Motion ; module Xray
+# @requires Motion::Xray
+module Motion::Xray
 
   class FrameEditor < PropertyEditor
 
@@ -105,4 +106,4 @@ module Motion ; module Xray
 
   end
 
-end end
+end

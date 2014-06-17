@@ -1,4 +1,5 @@
-module Motion ; module Xray
+# @requires Motion::Xray
+module Motion::Xray
 
   class Editor
     attr_accessor :target
@@ -59,4 +60,4 @@ module Motion ; module Xray
 
   end
 
-end end
+end

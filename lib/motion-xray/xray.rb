@@ -1,3 +1,4 @@
+# @provides Motion::Xray
 module Motion
   # This is the main interface that you'll need to use from in your app.
   #
@@ -7,63 +8,46 @@ module Motion
   # - `Motion::Xray.toggle` to do what it says on the tin
   # - `Motion::Xray.register(plugin)` to add a plugin
   module Xray
-
     module_function
-    def layout
-      unless @xray_layout
-        @xray_layout = XrayLayout.new
 
-        # register default plugins if this is the first time xray_ui has been
-        # accessed.  AKA "startup".  Default plugins get pushed to the front,
-        # so they will appear in reverse order than they are here.
-        [LogPlugin, AccessibilityPlugin, UIPlugin].each do |plugin_class|
-          unless Xray.plugins.any? { |plugin| plugin_class === plugin }
-            Xray.plugins.unshift(plugin_class.new)
-          end
+    def private_window
+      @private_window ||= begin
+        # register default plugins if this is the first time the window has been
+        # accessed.  AKA "startup".  Default plugins get pushed to the front, so
+        # they will appear in reverse order than they are here.
+        [InspectPlugin].each do |plugin_class|
+          Motion::Xray.plugins << plugin_class.new
         end
+
+        XrayPrivateWindow.alloc.initWithFrame(UIScreen.mainScreen.bounds)
       end
-      return @xray_layout
     end
 
     def controller
-      @xray_controller ||= XrayViewController.new
+      @xray_controller ||= XrayController.new
     end
 
     def toggle
-      Xray.layout.toggle
+      controller.toggle
     end
 
     def fire_up
-      Xray.layout.fire_up
+      controller.fire_up
     end
 
     def cool_down
-      Xray.layout.cool_down
+      controller.cool_down
+    end
+
+    def shutdown
+      controller.shutdown
     end
 
     def window
-      UIApplication.sharedApplication.keyWindow || UIApplication.sharedApplication.windows[0]
+      @window ||= UIApplication.sharedApplication.keyWindow || UIApplication.sharedApplication.windows[0]
     end
 
-    def first_responder
-      _find_first_responder(Xray.window)
-    end
-
-    def _find_first_responder(view)
-      if view.firstResponder?
-        return view
-      end
-
-      found = nil
-      view.subviews.each do |subview|
-        found = _find_first_responder(subview)
-        break if found
-      end
-
-      return found
-    end
-
-    def app_shared
+    def app
       UIApplication.sharedApplication
     end
 
@@ -72,8 +56,9 @@ module Motion
     end
 
     def take_screenshot(view)
-      UIGraphicsBeginImageContextWithOptions(view.bounds.size, false, view.scale)
-      view.drawViewHierarchyInRect(view.bounds, afterScreenUpdates: true)
+      scale = UIScreen.mainScreen.scale
+      UIGraphicsBeginImageContextWithOptions(view.bounds.size, false, scale)
+      view.drawViewHierarchyInRect(view.bounds, afterScreenUpdates: false)
       image = UIGraphicsGetImageFromCurrentImageContext()
       UIGraphicsEndImageContext()
 
@@ -85,15 +70,42 @@ module Motion
     end
 
     def register(plugin)
-      Xray.plugins << plugin
+      plugins << plugin
     end
 
-    def dashboard_label_text_color
-      @dashboard_label_text_color ||= UIColor.colorWithRed(0, green: 0, blue: 139 / 255.0)
+    def status_action(text=nil, save=false, &action)
+      return @status_action unless action
+
+      @status_was ||= []
+      if save
+        @status_was << [
+          @status_text,
+          @status_action,
+        ]
+      end
+
+      self.controller.layout.status_bar.text = text
+
+      @status_text = text
+      @status_action = action
     end
 
-end end
+    def restore_status
+      if @status_was && ! @status_was.empty?
+        text, action = @status_was.pop
+        self.controller.layout.status_bar.text = text
+
+        @status_text = text
+        @status_action = action
+      end
+    end
+
+  end
+
+end
 
 
 XrayTargetDidChangeNotification = 'Motion::Xray::TargetDidChangeNotification'
+XrayFireUpNotification = 'Motion::Xray::FireUpNotification'
+XrayCoolDownNotification = 'Motion::Xray::CoolDownNotification'
 
