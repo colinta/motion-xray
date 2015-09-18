@@ -1,7 +1,7 @@
 # @requires Motion::Xray
 module Motion::Xray
 
-  class PluginsBar < UIScrollView
+  class PluginsBarView < UIScrollView
     HEIGHT = 44
 
     def initWithFrame(frame)

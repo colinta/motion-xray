@@ -4,7 +4,7 @@ end
 
 
 require 'sugarcube'
-require 'sugarcube-uikit'
+require 'sugarcube-ui'
 require 'sugarcube-foundation'
 require 'sugarcube-notifications'
 require 'sugarcube-pointer'

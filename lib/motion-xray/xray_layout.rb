@@ -89,7 +89,7 @@ module Motion::Xray
 
       add StatusBarButton, :status_bar
       add UIView, :plugins_bar_bg do
-        add PluginsBar, :plugins_bar
+        add PluginsBarView, :plugins_bar
       end
 
       self.status_bar.off :touch
@@ -103,11 +103,11 @@ module Motion::Xray
     end
 
     def plugins_bar_style
-      frame width: '100%', height: PluginsBar::HEIGHT
+      frame width: '100%', height: PluginsBarView::HEIGHT
     end
 
     def plugins_bar_bg_style
-      frame from_bottom(width: '100%', height: PluginsBar::HEIGHT)
+      frame from_bottom(width: '100%', height: PluginsBarView::HEIGHT)
       gradient do
         startPoint [0, 1]
         endPoint [0, 0]

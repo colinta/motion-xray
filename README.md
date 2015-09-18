@@ -1,4 +1,4 @@
-Motion-Xray
+Motion::Xray
 ====
 
 Developer tools for iOS.  Runs on the device, no browser or computer needed.
@@ -36,7 +36,7 @@ often.
 My Proposal
 -----------
 
-Motion-Xray is such a solution.  During development you can use Xray as a UI
+Motion::Xray is such a solution.  During development you can use Xray as a UI
 inspector, or to monitor the console log, preview how accessibile your app is
 (to blind and color blind developers), or you can create a plugin that provides
 information specifically useful to your app.  Below I'll show how to create a
@@ -50,13 +50,14 @@ If you clone and run Xray in the simulator, you will see a very boring app:
 ![Xray Screenshot](http://media.colinta.com/xray/xray_app.png)
 
 Activate a "shake" gesture by pressing ⌘⌃Z and Xray will activate, which
-displays this:
+displays the Xray status bar:
 
-![Xray Screenshot](http://media.colinta.com/xray/xray.png)
+![Xray Screenshot](http://media.colinta.com/xray/xray_status_bar.png)
 
-The application shrinks down to a quarter size, and the development environment
-takes up the remaining space.  That is Xray, an in-app debugging and development
-environment! :smiley:
+Go ahead and tap that bar to display the plugins.  You'll see the `Inspect`
+plugin is already selected.
+
+![Xray Screenshot](http://media.colinta.com/xray/xray_plugins.png)
 
 Features
 --------
@@ -64,9 +65,10 @@ Features
 That's enough to have the `Motion::Xray.toggle` command fired whenever you shake
 the device.  If you want to use some other mechanism that launches Xray (a
 complicated gesture recognizer would be a good candidate), you can call
-`Xray.toggle` (which calls either `Xray.fire_up` or `Xray.cool_down`). The
-`Motion::Xray::XrayWindow` class is only used to listen for the shake event, so
-using it will not affect your app in any other way.
+`Motion::Xray.toggle` (which calls either `Motion::Xray.fire_up` or
+`Motion::Xray.cool_down`). The `Motion::Xray::XrayWindow` class is only used to
+listen for the shake event, so using it will not affect your app in any other
+way.
 
 When you shake your phone and activate Xray, you are presented with three panes
 and a toolbar at the bottom:

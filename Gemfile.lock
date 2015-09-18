@@ -1,26 +1,26 @@
 PATH
   remote: ../motion-kit
   specs:
-    motion-kit (0.10.7)
+    motion-kit (0.17.0)
       dbt (~> 1.1.5)
 
 PATH
   remote: ../motion-kit-events
   specs:
-    motion-kit-events (0.2.1)
+    motion-kit-events (0.3.1)
       dbt
       motion-kit
 
 PATH
   remote: ../sugarcube
   specs:
-    sugarcube (2.0.0)
+    sugarcube (3.0.7)
 
 PATH
   remote: ../sweet-kit
   specs:
-    sweet-kit (0.3.0)
-      motion-kit
+    sweet-kit (0.4.0)
+      motion-kit (~> 0.17.0)
       sugarcube
 
 GEM

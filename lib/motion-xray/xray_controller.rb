@@ -17,22 +17,22 @@ module Motion::Xray
     end
 
     def toggle
-      if active?
+      if running?
         cool_down
       else
         fire_up
       end
 
-      return active?
+      return running?
     end
 
-    def active?
-      @active
+    def running?
+      @running
     end
 
     def fire_up
-      return if @active
-      @active = true
+      return if @running
+      @running = true
 
       self.layout.fire_up
 
@@ -52,8 +52,8 @@ module Motion::Xray
     end
 
     def cool_down
-      return unless @active
-      @active = false
+      return unless @running
+      @running = false
 
       self.deactivate
       self.layout.cool_down

@@ -1,0 +1,14 @@
+# @requires Motion::Xray
+module Motion::Xray
+
+  class AnotherPlugin < Plugin
+    name 'Plugin Name'
+
+    def plugin_view(canvas)
+      return UIView.alloc.initWithFrame(canvas.bounds).tap do |view|
+      end
+    end
+
+  end
+
+end

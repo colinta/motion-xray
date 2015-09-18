@@ -11,16 +11,7 @@ module Motion
     module_function
 
     def private_window
-      @private_window ||= begin
-        # register default plugins if this is the first time the window has been
-        # accessed.  AKA "startup".  Default plugins get pushed to the front, so
-        # they will appear in reverse order than they are here.
-        [InspectPlugin].each do |plugin_class|
-          Motion::Xray.plugins << plugin_class.new
-        end
-
-        XrayPrivateWindow.alloc.initWithFrame(UIScreen.mainScreen.bounds)
-      end
+      @private_window ||= XrayPrivateWindow.alloc.initWithFrame(UIScreen.mainScreen.bounds)
     end
 
     def controller
@@ -66,7 +57,11 @@ module Motion
     end
 
     def plugins
-      @plugins ||= []
+      @plugins ||= begin
+        [InspectPlugin].map do |plugin_class|
+          plugin_class.new
+        end
+      end
     end
 
     def register(plugin)
